@@ -1,0 +1,204 @@
+/* ═══════════════════════════════
+   GLOBAL RESET
+═══════════════════════════════ */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  background: #f9f9ff;
+  color: #1a1a2e;
+  -webkit-font-smoothing: antialiased;
+}
+
+a {
+  text-decoration: none;
+}
+
+/* ═══════════════════════════════
+   SHARED COLOR VARIABLES
+═══════════════════════════════ */
+:root {
+  --purple: #6c63ff;
+  --purple-dark: #5549e0;
+  --orange: #ff6b35;
+  --orange-dark: #e55a26;
+  --dark: #1a1a2e;
+  --gray: #555;
+  --light-gray: #aaa;
+  --bg: #f9f9ff;
+  --white: #ffffff;
+}
+
+/* ═══════════════════════════════
+   SHARED BUTTON STYLES
+   (used across all pages)
+═══════════════════════════════ */
+.btn-primary {
+  background: var(--purple);
+  color: var(--white);
+  border: none;
+  padding: 13px 32px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+}
+
+.btn-primary:hover {
+  background: var(--purple-dark);
+  transform: translateY(-1px);
+}
+
+.btn-orange {
+  background: var(--orange);
+  color: var(--white);
+  border: none;
+  padding: 13px 32px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.btn-orange:hover {
+  background: var(--orange-dark);
+}
+
+.btn-outline {
+  background: transparent;
+  color: var(--white);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  padding: 11px 28px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--white);
+}
+
+/* ═══════════════════════════════
+   NAVBAR
+   (shared across all pages)
+═══════════════════════════════ */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 48px;
+  background: var(--purple);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.navbar__logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.navbar__logo-icon {
+  font-size: 20px;
+}
+
+.navbar__logo-text {
+  font-size: 45px;
+  font-weight: 700;
+  color: var(--white);
+  letter-spacing: -0.3px;
+}
+
+.navbar__links {
+  display: flex;
+  list-style: none;
+  gap: 32px;
+}
+
+.navbar__link {
+  font-size: 23px;
+  color: rgba(255, 255, 255, 0.8);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navbar__link:hover,
+.navbar__link.active {
+  color: var(--white);
+}
+
+.navbar__auth {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.navbar__login {
+  font-size: 23px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
+  transition: color 0.2s;
+}
+
+.navbar__login:hover {
+  color: var(--white);
+}
+
+.navbar__signup {
+  font-size: 23px;
+  color: var(--white);
+  border: 1.5px solid rgba(255, 255, 255, 0.7);
+  padding: 7px 20px;
+  border-radius: 6px;
+  font-weight: 600;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.navbar__signup:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: var(--white);
+}
+
+/* ═══════════════════════════════
+   FOOTER
+   (shared across all pages)
+═══════════════════════════════ */
+.footer {
+  background: var(--dark);
+  color: rgba(255, 255, 255, 0.7);
+  text-align: center;
+  padding: 24px 48px;
+  font-size: 13px;
+}
+
+.footer a {
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 12px;
+  transition: color 0.2s;
+}
+
+.footer a:hover {
+  color: var(--white);
+}
+
+/* ═══════════════════════════════
+   RESPONSIVE SHARED
+═══════════════════════════════ */
+@media (max-width: 768px) {
+  .navbar {
+    padding: 14px 20px;
+  }
+  .navbar__links {
+    display: none;
+  }
+}

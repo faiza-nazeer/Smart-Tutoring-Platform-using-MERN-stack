@@ -1,0 +1,339 @@
+/* ═══════════════════════════════
+   COURSE DETAIL PAGE STYLES
+   Import only in CourseDetail.tsx
+═══════════════════════════════ */
+
+.cd-page {
+  min-height: 100vh;
+  background: var(--bg);
+}
+
+/* ── Top banner ── */
+.cd-banner {
+  background: var(--purple);
+  padding: 48px 48px 40px;
+}
+
+.cd-banner__inner {
+  max-width: 740px;
+}
+
+.cd-banner__subject {
+  display: inline-block;
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  padding: 4px 14px;
+  border-radius: 12px;
+  margin-bottom: 16px;
+  letter-spacing: 0.5px;
+}
+
+.cd-banner__title {
+  font-size: 30px;
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.3;
+  margin-bottom: 16px;
+  letter-spacing: -0.3px;
+}
+
+.cd-banner__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 14px;
+  flex-wrap: wrap;
+}
+
+.cd-banner__rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cd-stars {
+  color: #FFD700;
+  font-size: 14px;
+  letter-spacing: 1px;
+}
+
+.cd-banner__dot {
+  opacity: 0.5;
+}
+
+/* ── Body layout ── */
+.cd-body {
+  display: flex;
+  gap: 32px;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 48px 80px;
+  align-items: flex-start;
+}
+
+.cd-main {
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── Sections ── */
+.cd-section {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 28px 28px;
+  margin-bottom: 24px;
+  border: 1px solid #eeecf8;
+}
+
+.cd-section__heading {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 20px;
+  letter-spacing: -0.2px;
+}
+
+/* What you'll learn */
+.cd-learn-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.cd-learn-list__item {
+  display: flex;
+  gap: 10px;
+  font-size: 15px;
+  color: var(--dark);
+  line-height: 1.5;
+  align-items: flex-start;
+}
+
+.cd-learn-list__check {
+  color: var(--purple);
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Topics */
+.cd-topics {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.cd-topic-chip {
+  background: #eeedfe;
+  color: var(--purple);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 16px;
+  border-radius: 20px;
+}
+
+/* About tutor */
+.cd-tutor-about {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+
+.cd-tutor-about__avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: #eeedfe;
+  color: var(--purple);
+  font-size: 16px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cd-tutor-about__name {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 4px;
+}
+
+.cd-tutor-about__exp {
+  font-size: 13px;
+  color: var(--gray);
+}
+
+.cd-tutor-about__bio {
+  font-size: 15px;
+  color: var(--gray);
+  line-height: 1.8;
+}
+
+/* Reviews */
+.cd-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cd-review-card {
+  border: 1px solid #f0eeff;
+  border-radius: 10px;
+  padding: 16px 20px;
+}
+
+.cd-review-card__top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.cd-review-card__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #eeedfe;
+  color: var(--purple);
+  font-size: 13px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cd-review-card__name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 3px;
+}
+
+.cd-review-card__comment {
+  font-size: 14px;
+  color: var(--gray);
+  line-height: 1.7;
+}
+
+/* ── Booking sidebar ── */
+.cd-sidebar {
+  width: 320px;
+  flex-shrink: 0;
+  position: sticky;
+  top: 80px;
+}
+
+.cd-booking-card {
+  background: var(--white);
+  border-radius: 16px;
+  border: 1px solid #eeecf8;
+  padding: 28px 24px;
+  box-shadow: 0 8px 32px rgba(108, 99, 255, 0.08);
+}
+
+.cd-booking-card__price {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 20px;
+}
+
+.cd-booking-card__price span {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--gray);
+}
+
+.cd-booking-card__info {
+  border-top: 1px solid #f0eeff;
+  border-bottom: 1px solid #f0eeff;
+  padding: 16px 0;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cd-booking-card__info-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  color: var(--gray);
+}
+
+.cd-booking-card__info-row strong {
+  color: var(--dark);
+  font-weight: 600;
+}
+
+.cd-booking-card__availability {
+  margin-bottom: 24px;
+}
+
+.cd-booking-card__avail-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.cd-booking-card__avail-time {
+  font-size: 13px;
+  color: var(--gray);
+  margin-bottom: 5px;
+}
+
+.cd-booking-card__btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: var(--orange);
+  color: var(--white);
+  padding: 14px;
+  border-radius: 10px;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  margin-bottom: 12px;
+  transition: background 0.2s;
+}
+
+.cd-booking-card__btn:hover {
+  background: var(--orange-dark);
+}
+
+.cd-booking-card__msg-btn {
+  width: 100%;
+  padding: 13px;
+  border-radius: 10px;
+  border: 2px solid var(--purple);
+  background: transparent;
+  color: var(--purple);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.cd-booking-card__msg-btn:hover {
+  background: #f0eeff;
+}
+
+/* ── Responsive ── */
+@media (max-width: 900px) {
+  .cd-body { flex-direction: column; padding: 24px 20px 48px; }
+  .cd-sidebar { width: 100%; position: static; }
+  .cd-banner { padding: 36px 20px 28px; }
+  .cd-banner__title { font-size: 22px; }
+  .cd-learn-list { grid-template-columns: 1fr; }
+}

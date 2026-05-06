@@ -1,0 +1,302 @@
+/* ═══════════════════════════════
+   SIGNUP PAGE STYLES
+   Import this only in Signup.tsx
+═══════════════════════════════ */
+
+.signup-page {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+}
+
+.signup-container {
+  flex: 1;
+  display: flex;
+  min-height: calc(100vh - 60px);
+}
+
+/* ── Left branding panel ── */
+.signup-left {
+  width: 45%;
+  background: var(--purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 60px 48px;
+  position: relative;
+  overflow: hidden;
+}
+
+.signup-left__content {
+  position: relative;
+  z-index: 2;
+}
+
+.signup-left__logo {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--white);
+  margin-bottom: 40px;
+}
+
+.signup-left__heading {
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--white);
+  line-height: 1.25;
+  margin-bottom: 18px;
+  letter-spacing: -0.5px;
+}
+
+.signup-left__subtext {
+  font-size: 16px;
+  color: rgba(255, 255, 255, 0.8);
+  line-height: 1.7;
+  margin-bottom: 40px;
+  max-width: 320px;
+}
+
+/* Benefits checklist */
+.signup-left__benefits {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.signup-left__benefit {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.85);
+  line-height: 1.5;
+}
+
+.signup-left__benefit-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+
+/* Decorative circles */
+.signup-left__circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+}
+
+.signup-left__circle--1 {
+  width: 300px;
+  height: 300px;
+  bottom: -80px;
+  right: -80px;
+}
+
+.signup-left__circle--2 {
+  width: 180px;
+  height: 180px;
+  top: -40px;
+  left: -40px;
+}
+
+/* ── Right form panel ── */
+.signup-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  background: var(--white);
+  overflow-y: auto;
+}
+
+.signup-form-wrap {
+  width: 100%;
+  max-width: 420px;
+}
+
+.signup-form__heading {
+  font-size: 32px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 8px;
+  letter-spacing: -0.3px;
+}
+
+.signup-form__subtext {
+  font-size: 15px;
+  color: var(--gray);
+  margin-bottom: 28px;
+}
+
+.signup-form__link {
+  color: var(--purple);
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.signup-form__link:hover {
+  color: var(--purple-dark);
+}
+
+/* ── Role toggle ── */
+.signup-role {
+  margin-bottom: 28px;
+}
+
+.signup-role__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 10px;
+}
+
+.signup-role__toggle {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.signup-role__btn {
+  padding: 12px 8px;
+  border: 2px solid #e0e0e0;
+  border-radius: 8px;
+  background: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: center;
+}
+
+.signup-role__btn:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
+.signup-role__btn--active {
+  border-color: var(--purple);
+  background: #f0eeff;
+  color: var(--purple);
+}
+
+/* ── Form fields ── */
+.signup-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.signup-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.signup-form__label {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--dark);
+}
+
+.signup-form__input {
+  width: 100%;
+  padding: 13px 16px;
+  border: 1.5px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 15px;
+  color: var(--dark);
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--white);
+}
+
+.signup-form__input:focus {
+  border-color: var(--purple);
+}
+
+.signup-form__input::placeholder {
+  color: var(--light-gray);
+}
+
+.signup-form__select {
+  appearance: none;
+  cursor: pointer;
+}
+
+.signup-form__input-wrap {
+  position: relative;
+}
+
+.signup-form__input-wrap .signup-form__input {
+  padding-right: 48px;
+}
+
+.signup-form__eye {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 16px;
+  padding: 0;
+  line-height: 1;
+}
+
+/* ── Submit button ── */
+.signup-form__submit {
+  width: 100%;
+  padding: 14px;
+  background: var(--orange);
+  color: var(--white);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s;
+  margin-top: 4px;
+}
+
+.signup-form__submit:hover {
+  background: var(--orange-dark);
+  transform: translateY(-1px);
+}
+
+/* ── Terms ── */
+.signup-form__terms {
+  font-size: 13px;
+  color: var(--light-gray);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .signup-container {
+    flex-direction: column;
+  }
+  .signup-left {
+    width: 100%;
+    padding: 36px 24px;
+    min-height: auto;
+  }
+  .signup-left__heading { font-size: 26px; }
+  .signup-right {
+    padding: 36px 24px;
+  }
+}
