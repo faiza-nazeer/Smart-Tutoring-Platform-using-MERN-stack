@@ -1,0 +1,344 @@
+/* ═══════════════════════════════
+   BOOKING PAGE STYLES
+   Import only in Booking.tsx
+═══════════════════════════════ */
+
+.booking {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 48px 48px 64px;
+}
+
+.booking__header {
+  text-align: center;
+  margin-bottom: 40px;
+}
+
+.booking__title {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 10px;
+}
+
+.booking__subtitle {
+  font-size: 16px;
+  color: var(--gray);
+}
+
+.booking__layout {
+  display: flex;
+  gap: 32px;
+  align-items: flex-start;
+}
+
+/* ── Form ── */
+.booking__form {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.booking__field {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booking__label {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark);
+  letter-spacing: 0.3px;
+}
+
+.booking__input {
+  padding: 12px 16px;
+  border: 1.5px solid #e0e0f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--dark);
+  outline: none;
+  transition: border-color 0.2s;
+  background: var(--white);
+}
+
+.booking__input:focus {
+  border-color: var(--purple);
+}
+
+.booking__textarea {
+  padding: 12px 16px;
+  border: 1.5px solid #e0e0f0;
+  border-radius: 8px;
+  font-size: 14px;
+  color: var(--dark);
+  outline: none;
+  transition: border-color 0.2s;
+  resize: vertical;
+  font-family: inherit;
+  background: var(--white);
+}
+
+.booking__textarea:focus {
+  border-color: var(--purple);
+}
+
+.booking__subject-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.booking__subject-btn {
+  padding: 9px 18px;
+  border-radius: 8px;
+  border: 1.5px solid #e0e0f0;
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.booking__subject-btn:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
+.booking__subject-btn--active {
+  background: #ede9ff;
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
+.booking__type-toggle {
+  display: flex;
+  gap: 12px;
+}
+
+.booking__type-btn {
+  flex: 1;
+  padding: 12px;
+  border-radius: 8px;
+  border: 1.5px solid #e0e0f0;
+  background: var(--white);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.booking__type-btn:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
+.booking__type-btn--active {
+  background: #ede9ff;
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
+.booking__time-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+
+.booking__time-btn {
+  padding: 10px 8px;
+  border-radius: 8px;
+  border: 1.5px solid #e0e0f0;
+  background: var(--white);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--gray);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.booking__time-btn:hover {
+  border-color: var(--purple);
+  color: var(--purple);
+}
+
+.booking__time-btn--active {
+  background: var(--purple);
+  border-color: var(--purple);
+  color: var(--white);
+}
+
+.booking__submit-btn {
+  background: var(--orange);
+  color: var(--white);
+  border: none;
+  padding: 15px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+}
+
+.booking__submit-btn:hover {
+  background: var(--orange-dark);
+}
+
+/* ── Summary Card ── */
+.booking__summary {
+  width: 280px;
+  flex-shrink: 0;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 2px 16px rgba(108, 99, 255, 0.1);
+  position: sticky;
+  top: 90px;
+}
+
+.booking__summary-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 20px;
+}
+
+.booking__summary-tutor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 16px;
+}
+
+.booking__summary-avatar {
+  width: 48px;
+  height: 48px;
+  background: var(--bg);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  border: 2px solid var(--purple);
+}
+
+.booking__summary-name {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.booking__summary-role {
+  font-size: 12px;
+  color: var(--gray);
+}
+
+.booking__summary-details {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.booking__summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+}
+
+.booking__summary-key {
+  color: var(--gray);
+}
+
+.booking__summary-val {
+  color: var(--dark);
+  font-weight: 600;
+}
+
+.booking__summary-row--total {
+  border-top: 1px solid #f0f0f0;
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.booking__summary-total {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--orange);
+}
+
+/* ── Success ── */
+.booking__success {
+  max-width: 480px;
+  margin: 80px auto;
+  text-align: center;
+  background: var(--white);
+  border-radius: 20px;
+  padding: 56px 40px;
+  box-shadow: 0 4px 32px rgba(108, 99, 255, 0.1);
+}
+
+.booking__success-icon {
+  font-size: 64px;
+  margin-bottom: 20px;
+}
+
+.booking__success-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--dark);
+  margin-bottom: 14px;
+}
+
+.booking__success-text {
+  font-size: 16px;
+  color: var(--gray);
+  line-height: 1.7;
+  margin-bottom: 8px;
+}
+
+.booking__success-sub {
+  font-size: 13px;
+  color: var(--light-gray);
+  margin-bottom: 28px;
+}
+
+.booking__back-btn {
+  background: var(--purple);
+  color: var(--white);
+  border: none;
+  padding: 13px 32px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.booking__back-btn:hover {
+  background: var(--purple-dark);
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .booking {
+    padding: 24px 20px 48px;
+  }
+  .booking__layout {
+    flex-direction: column;
+  }
+  .booking__summary {
+    width: 100%;
+    position: static;
+  }
+  .booking__time-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}

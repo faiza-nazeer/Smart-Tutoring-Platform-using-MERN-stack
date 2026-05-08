@@ -1,0 +1,35 @@
+/* src/pages/AdminCourses.css */
+.courses-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
+.course-card {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+.course-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(108,99,255,0.12);
+}
+.course-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.course-icon { font-size: 2rem; }
+.course-card h3 { font-size: 1rem; color: var(--dark); margin: 0 0 8px; }
+.course-meta { font-size: 0.85rem; color: var(--gray); margin: 4px 0; }
+.course-stats {
+  display: flex;
+  gap: 12px;
+  margin: 12px 0 0;
+  font-size: 0.82rem;
+  color: var(--gray);
+  flex-wrap: wrap;
+}
+.course-price { color: var(--orange); font-weight: 700; }

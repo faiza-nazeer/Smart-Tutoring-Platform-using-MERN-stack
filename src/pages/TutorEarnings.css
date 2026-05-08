@@ -1,0 +1,132 @@
+.te-page { padding: 2rem; }
+
+.te-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.te-header h1 { font-size: 1.8rem; font-weight: 700; color: var(--dark); margin-bottom: 0.25rem; }
+.te-header p  { color: var(--gray); font-size: 0.95rem; }
+
+.te-withdraw-btn {
+  background: var(--orange);
+  color: white;
+  border: none;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.te-withdraw-btn:hover { background: var(--orange-dark); }
+
+.te-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.te-stat-card {
+  background: white;
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  border: 1.5px solid transparent;
+}
+
+.te-stat-card--highlight {
+  border-color: var(--purple);
+  background: #ede9ff;
+}
+
+.te-stat-icon { font-size: 1.4rem; }
+.te-stat-value { font-size: 1.35rem; font-weight: 700; color: var(--dark); }
+.te-stat-label { font-size: 0.78rem; color: var(--gray); }
+
+.te-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.te-section {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+}
+
+.te-section h2 { font-size: 1.05rem; font-weight: 700; color: var(--dark); margin-bottom: 1.5rem; }
+
+.te-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 200px;
+  gap: 1rem;
+}
+
+.te-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+.te-bar-amount { font-size: 0.72rem; color: var(--gray); margin-bottom: 0.4rem; font-weight: 600; }
+
+.te-bar-track {
+  flex: 1;
+  width: 100%;
+  background: #ebebf5;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.te-bar-fill { width: 100%; background: var(--purple); border-radius: 8px; transition: height 0.4s ease; }
+.te-bar-month { font-size: 0.8rem; color: var(--dark); margin-top: 0.5rem; font-weight: 700; }
+.te-bar-sessions { font-size: 0.7rem; color: var(--gray); }
+
+.te-transactions { display: flex; flex-direction: column; gap: 0.85rem; }
+
+.te-transaction {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem;
+  background: #f9f9ff;
+  border-radius: 10px;
+  transition: background 0.2s;
+}
+
+.te-transaction:hover { background: #ede9ff; }
+
+.te-t-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.te-t-info { flex: 1; }
+.te-t-name   { font-size: 0.9rem; font-weight: 600; color: var(--dark); margin-bottom: 0.15rem; }
+.te-t-course { font-size: 0.78rem; color: var(--gray); }
+.te-t-amount { font-size: 0.95rem; font-weight: 700; color: #27ae60; white-space: nowrap; }

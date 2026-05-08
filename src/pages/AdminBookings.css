@@ -1,0 +1,14 @@
+/* src/pages/AdminBookings.css */
+.booking-kpis { display: flex; gap: 12px; }
+.mini-stat {
+  background: white;
+  border: 1px solid #e0e0ef;
+  border-radius: 10px;
+  padding: 10px 16px;
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--gray);
+}
+.mini-stat span { display: block; font-size: 1.3rem; font-weight: 700; color: var(--dark); }
+.mini-stat.green span { color: #2e7d32; }
+.mini-stat.orange span { color: var(--orange); }

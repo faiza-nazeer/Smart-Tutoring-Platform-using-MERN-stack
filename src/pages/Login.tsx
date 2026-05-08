@@ -8,13 +8,16 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [role, setRole] = useState<'student' | 'tutor' | 'admin'>('student')
   const navigate = useNavigate()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     // TODO: connect to backend login API
     // When backend is ready, check role from response and navigate accordingly
-    navigate('/dashboard/student')
+    if (role === 'tutor')       navigate('/dashboard/tutor')
+    else if (role === 'admin')  navigate('/dashboard/admin')
+    else                        navigate('/dashboard/student')
   }
 
   return (
@@ -66,6 +69,31 @@ function Login() {
               <a href="/signup" className="login-form__link">Sign up for free</a>
             </p>
 
+            {/* Role Toggle */}
+            <div className="login-role-toggle">
+              <button
+                type="button"
+                className={`login-role-btn ${role === 'student' ? 'login-role-btn--active' : ''}`}
+                onClick={() => setRole('student')}
+              >
+                👨‍🎓 Student
+              </button>
+              <button
+                type="button"
+                className={`login-role-btn ${role === 'tutor' ? 'login-role-btn--active' : ''}`}
+                onClick={() => setRole('tutor')}
+              >
+                👩‍🏫 Tutor
+              </button>
+              <button
+                type="button"
+                className={`login-role-btn ${role === 'admin' ? 'login-role-btn--active login-role-btn--admin' : ''}`}
+                onClick={() => setRole('admin')}
+              >
+                🛡️ Admin
+              </button>
+            </div>
+
             <form className="login-form" onSubmit={handleSubmit}>
 
               <div className="login-form__group">
@@ -106,8 +134,13 @@ function Login() {
                 </div>
               </div>
 
-              <button type="submit" className="login-form__submit">
-                Log In
+              <button
+                type="submit"
+                className={`login-form__submit ${role === 'admin' ? 'login-form__submit--admin' : ''}`}
+              >
+                {role === 'student' && '👨‍🎓 Log In as Student'}
+                {role === 'tutor'   && '👩‍🏫 Log In as Tutor'}
+                {role === 'admin'   && '🛡️ Log In as Admin'}
               </button>
 
               <div className="login-form__divider">

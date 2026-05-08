@@ -1,0 +1,9 @@
+/* src/pages/AdminUsers.css */
+.role-badge {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+.role-student { background: #e8e8ff; color: var(--purple); }
+.role-tutor   { background: #fff3e0; color: #e65100; }

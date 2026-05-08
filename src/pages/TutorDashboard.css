@@ -1,0 +1,488 @@
+:root {
+  --purple: #6c63ff;
+  --purple-dark: #5549e0;
+  --orange: #ff6b35;
+  --orange-dark: #e55a26;
+  --dark: #1a1a2e;
+  --gray: #555;
+  --light-gray: #aaa;
+  --bg: #f9f9ff;
+  --white: #ffffff;
+}
+
+.td-page {
+  display: flex;
+  min-height: 100vh;
+  background: var(--bg);
+  font-family: 'Segoe UI', sans-serif;
+}
+
+.td-body {
+  display: flex;
+  width: 100%;
+}
+
+/* Sidebar */
+.td-sidebar {
+  width: 240px;
+  min-height: 100vh;
+  background: var(--white);
+  border-right: 1px solid #ebebf5;
+  display: flex;
+  flex-direction: column;
+  padding: 1.5rem 1rem;
+  position: sticky;
+  top: 0;
+  flex-shrink: 0;
+}
+
+.td-logo {
+  font-size: 1.3rem;
+  font-weight: 800;
+  color: var(--purple);
+  margin-bottom: 1.75rem;
+  padding-left: 0.5rem;
+}
+
+.td-profile {
+  text-align: center;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #f0f0f0;
+  margin-bottom: 1.25rem;
+}
+
+.td-profile__avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 0.75rem;
+}
+
+.td-profile__name {
+  font-weight: 700;
+  color: var(--dark);
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+}
+
+.td-profile__subject {
+  font-size: 0.78rem;
+  color: var(--gray);
+  margin-bottom: 0.5rem;
+}
+
+.td-profile__badge {
+  background: #fff3ee;
+  color: var(--orange);
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+}
+
+.td-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex: 1;
+}
+
+.td-nav__link {
+  display: block;
+  padding: 0.65rem 0.9rem;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  color: var(--gray);
+  text-decoration: none;
+  font-weight: 500;
+  transition: background 0.2s, color 0.2s;
+}
+
+.td-nav__link:hover {
+  background: #f9f9ff;
+  color: var(--purple);
+}
+
+.td-nav__link--active {
+  background: #ede9ff;
+  color: var(--purple);
+  font-weight: 700;
+}
+
+.td-logout-btn {
+  display: block;
+  text-align: center;
+  padding: 0.65rem;
+  border-radius: 8px;
+  border: 1.5px solid #eee;
+  background: transparent;
+  color: var(--gray);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  margin-top: 1rem;
+  transition: background 0.2s, color 0.2s;
+}
+
+.td-logout-btn:hover {
+  background: #fdecea;
+  color: #e74c3c;
+  border-color: #e74c3c;
+}
+
+/* Main */
+.td-main {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+/* Welcome */
+.td-welcome {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 2rem;
+}
+
+.td-welcome h1 {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 0.25rem;
+}
+
+.td-welcome p {
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+
+.td-availability-btn {
+  background: #e6faf0;
+  color: #27ae60;
+  border: 1.5px solid #27ae60;
+  padding: 0.65rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.td-availability-btn:hover {
+  background: #d0f5e3;
+}
+
+/* Stats */
+.td-stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+  margin-bottom: 1.75rem;
+}
+
+.td-stat-card {
+  background: var(--white);
+  border-radius: 14px;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.td-stat-card__icon {
+  font-size: 1.5rem;
+  margin-bottom: 0.25rem;
+}
+
+.td-stat-card__value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.td-stat-card__label {
+  font-size: 0.8rem;
+  color: var(--gray);
+}
+
+/* Columns */
+.td-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-bottom: 1.75rem;
+}
+
+/* Section */
+.td-section {
+  background: var(--white);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.06);
+}
+
+.td-section__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1.25rem;
+}
+
+.td-section__header h2 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--dark);
+}
+
+.td-section__link {
+  font-size: 0.82rem;
+  color: var(--purple);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.td-section__link:hover {
+  text-decoration: underline;
+}
+
+/* Sessions */
+.td-sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.td-session-card {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.85rem;
+  border-radius: 10px;
+  background: #f9f9ff;
+  transition: background 0.2s;
+}
+
+.td-session-card:hover {
+  background: #ede9ff;
+}
+
+.td-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--purple);
+  color: white;
+  font-weight: 700;
+  font-size: 0.82rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.td-avatar--sm {
+  width: 34px;
+  height: 34px;
+  font-size: 0.75rem;
+}
+
+.td-session-card__info {
+  flex: 1;
+}
+
+.td-session-card__name {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 0.15rem;
+}
+
+.td-session-card__subject {
+  font-size: 0.78rem;
+  color: var(--gray);
+}
+
+.td-session-card__time {
+  text-align: right;
+  font-size: 0.78rem;
+  color: var(--gray);
+}
+
+.td-session-card__date {
+  font-weight: 600;
+  color: var(--purple);
+  margin-bottom: 0.15rem;
+}
+
+.td-start-btn {
+  background: var(--orange);
+  color: white;
+  border: none;
+  padding: 0.45rem 1rem;
+  border-radius: 7px;
+  font-weight: 600;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.td-start-btn:hover {
+  background: var(--orange-dark);
+}
+
+/* Earnings Chart */
+.td-earnings-chart {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-around;
+  height: 180px;
+  padding: 0.5rem 0;
+  gap: 1rem;
+}
+
+.td-bar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  height: 100%;
+}
+
+.td-bar-amount {
+  font-size: 0.72rem;
+  color: var(--gray);
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.td-bar-track {
+  flex: 1;
+  width: 100%;
+  background: #ebebf5;
+  border-radius: 8px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.td-bar-fill {
+  width: 100%;
+  background: var(--purple);
+  border-radius: 8px;
+  transition: height 0.4s ease;
+}
+
+.td-bar-month {
+  font-size: 0.8rem;
+  color: var(--gray);
+  margin-top: 0.5rem;
+  font-weight: 600;
+}
+
+/* Courses */
+.td-courses {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.td-course-card {
+  padding: 1rem;
+  border-radius: 10px;
+  background: #f9f9ff;
+  border: 1.5px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.td-course-card:hover {
+  border-color: var(--purple);
+}
+
+.td-course-card__info h4 {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--dark);
+  margin-bottom: 0.25rem;
+}
+
+.td-course-card__info p {
+  font-size: 0.78rem;
+  color: var(--gray);
+  margin-bottom: 0.75rem;
+}
+
+.td-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.75rem;
+  color: var(--gray);
+  margin-bottom: 0.35rem;
+}
+
+.td-progress-bar {
+  height: 6px;
+  background: #ddd;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.td-progress-fill {
+  height: 100%;
+  background: var(--purple);
+  border-radius: 10px;
+}
+
+/* Reviews */
+.td-reviews {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.td-review-card {
+  padding: 1rem;
+  border-radius: 10px;
+  background: #f9f9ff;
+}
+
+.td-review-card__top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 0.6rem;
+}
+
+.td-review-card__name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: var(--dark);
+  margin-bottom: 0.1rem;
+}
+
+.td-review-card__date {
+  font-size: 0.75rem;
+  color: var(--light-gray);
+}
+
+.td-review-card__stars {
+  margin-left: auto;
+  font-size: 0.8rem;
+}
+
+.td-review-card__comment {
+  font-size: 0.82rem;
+  color: var(--gray);
+  font-style: italic;
+  line-height: 1.5;
+}

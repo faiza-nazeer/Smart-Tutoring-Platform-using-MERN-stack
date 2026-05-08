@@ -237,6 +237,14 @@
   transform: translateY(-1px);
 }
 
+.login-form__submit--admin {
+  background: var(--dark);
+}
+
+.login-form__submit--admin:hover {
+  background: #2d2d4a;
+}
+
 /* ── Divider ── */
 .login-form__divider {
   display: flex;
@@ -287,6 +295,42 @@
   font-size: 15px;
 }
 
+/* ── Role Toggle ── */
+.login-role-toggle {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  background: #f0efff;
+  padding: 0.4rem;
+  border-radius: 10px;
+}
+
+.login-role-btn {
+  flex: 1;
+  padding: 0.65rem 0.4rem;
+  border: none;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  background: transparent;
+  color: var(--gray);
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.login-role-btn--active {
+  background: var(--purple);
+  color: white;
+  box-shadow: 0 2px 8px rgba(108, 99, 255, 0.3);
+}
+
+.login-role-btn--admin {
+  background: var(--dark);
+  color: white;
+  box-shadow: 0 2px 8px rgba(26, 26, 46, 0.3);
+}
+
 /* ── Responsive ── */
 @media (max-width: 768px) {
   .login-container {
@@ -300,5 +344,9 @@
   .login-left__heading { font-size: 28px; }
   .login-right {
     padding: 40px 24px;
+  }
+  .login-role-btn {
+    font-size: 0.75rem;
+    padding: 0.6rem 0.3rem;
   }
 }

@@ -1,6 +1,8 @@
 // StudentDashboard.tsx
 // What a student sees after logging in
+import { Link, useLocation } from 'react-router-dom';
 import './StudentDashboard.css'
+import { useState } from 'react'
 import Navbar from '../components/Navbar'
 
 // Dummy data — replace with API calls later
@@ -26,6 +28,17 @@ const STATS = [
 ]
 
 function StudentDashboard() {
+  const location = useLocation();
+
+  const navLinks = [
+    { to: '/dashboard/student', label: '🏠 Dashboard' },
+    { to: '/dashboard/courses', label: '📚 My Courses' },
+    { to: '/dashboard/sessions', label: '📅 My Sessions' },
+    { to: '/dashboard/find-tutors', label: '🔍 Find Tutors' },
+    { to: '/dashboard/profile', label: '👤 My Profile' },
+    { to: '/dashboard/settings', label: '⚙️ Settings' },
+  ]
+
   return (
     <div className="sd-page">
       <Navbar />
@@ -42,17 +55,20 @@ function StudentDashboard() {
           </div>
 
           <nav className="sd-nav">
-            <a href="#" className="sd-nav__link sd-nav__link--active">🏠 Dashboard</a>
-            <a href="#" className="sd-nav__link">📚 My Courses</a>
-            <a href="#" className="sd-nav__link">📅 My Sessions</a>
-            <a href="/courses" className="sd-nav__link">🔍 Find Tutors</a>
-            <a href="#" className="sd-nav__link">👤 My Profile</a>
-            <a href="#" className="sd-nav__link">⚙️ Settings</a>
+            {navLinks.map(link => (
+              <Link
+                key={link.to}
+                to={link.to}
+                className={`sd-nav__link ${location.pathname === link.to ? 'sd-nav__link--active' : ''}`}
+              >
+                {link.label}
+              </Link>
+            ))}
           </nav>
 
           <button className="sd-logout-btn">Log Out</button>
         </aside>
-
+        
         {/* Main content */}
         <main className="sd-main">
 
@@ -62,7 +78,7 @@ function StudentDashboard() {
               <h1 className="sd-welcome__heading">Welcome back, {STUDENT.name.split(' ')[0]}! 👋</h1>
               <p className="sd-welcome__sub">Here's what's happening with your learning today.</p>
             </div>
-            <a href="/courses" className="sd-find-tutor-btn">+ Find a Tutor</a>
+            <Link to="/dashboard/find-tutors" className="sd-find-tutor-btn">+ Find a Tutor</Link>
           </div>
 
           {/* Stats row */}
@@ -83,7 +99,7 @@ function StudentDashboard() {
             <section className="sd-section">
               <div className="sd-section__header">
                 <h2 className="sd-section__heading">Upcoming Sessions</h2>
-                <a href="#" className="sd-section__link">View all</a>
+                <Link to="/dashboard/sessions" className="sd-section__link">View all</Link>
               </div>
               <div className="sd-sessions">
                 {UPCOMING_SESSIONS.map(s => (
@@ -107,7 +123,7 @@ function StudentDashboard() {
             <section className="sd-section">
               <div className="sd-section__header">
                 <h2 className="sd-section__heading">My Courses</h2>
-                <a href="#" className="sd-section__link">View all</a>
+                <Link to="/dashboard/courses" className="sd-section__link">View all</Link>
               </div>
               <div className="sd-courses">
                 {ENROLLED_COURSES.map(c => (

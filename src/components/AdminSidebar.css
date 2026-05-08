@@ -1,0 +1,52 @@
+/* src/components/AdminSidebar.css */
+.admin-sidebar {
+  width: 240px;
+  background: var(--dark);
+  color: white;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 0;
+  position: fixed;
+  top: 0; left: 0;
+  height: 100vh;
+  z-index: 100;
+}
+.sidebar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 24px 24px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  font-size: 1.2rem;
+  font-weight: 700;
+}
+.sidebar-brand .brand-name span { color: var(--purple); }
+.brand-icon { font-size: 1.4rem; }
+.sidebar-nav {
+  flex: 1;
+  padding: 16px 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 24px;
+  color: rgba(255,255,255,0.7);
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+  border-left: 3px solid transparent;
+}
+.sidebar-link:hover { background: rgba(255,255,255,0.07); color: white; }
+.sidebar-link.active {
+  background: rgba(108,99,255,0.15);
+  color: var(--purple);
+  border-left-color: var(--purple);
+}
+.sidebar-footer {
+  padding: 16px 0;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
