@@ -1,28 +1,44 @@
-// src/pages/AdminTutors.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import "./AdminLayout.css";
-
-const tutors = [
-  { id: 1, name: "Dr. Sarah Johnson", subject: "Mathematics", students: 142, rating: 4.9, earnings: "$3,240", status: "Active", joined: "Jan 2024" },
-  { id: 2, name: "Prof. Michael Chen", subject: "Physics", students: 98, rating: 4.8, earnings: "$2,180", status: "Active", joined: "Feb 2024" },
-  { id: 3, name: "Emma Williams", subject: "English Literature", students: 75, rating: 4.7, earnings: "$1,650", status: "Active", joined: "Mar 2024" },
-  { id: 4, name: "James Rodriguez", subject: "Chemistry", students: 60, rating: 4.6, earnings: "$1,320", status: "Suspended", joined: "Apr 2024" },
-  { id: 5, name: "Aisha Patel", subject: "Biology", students: 110, rating: 4.9, earnings: "$2,420", status: "Active", joined: "Jan 2024" },
-  { id: 6, name: "Tom Baker", subject: "Computer Science", students: 88, rating: 4.5, earnings: "$1,940", status: "Pending", joined: "May 2024" },
-];
+import { getUsers, updateUser } from "../api/api";
+import UserModal from "../components/UserModal";
 
 export default function AdminTutors() {
+  const [tutors, setTutors] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [selectedTutor, setSelectedTutor] = useState<any>(null);
+
+  useEffect(() => {
+    getUsers()
+      .then((data: any[]) => {
+        const onlyTutors = data.filter(u => u.role === "tutor");
+        setTutors(onlyTutors);
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleSuspend = async (tutor: any) => {
+    const newStatus = tutor.status === "Active" ? "Suspended" : "Active";
+    const updated = await updateUser(tutor._id, { status: newStatus });
+    setTutors(prev => prev.map(t => t._id === tutor._id ? { ...t, status: updated.status } : t));
+  };
 
   const filtered = tutors.filter((t) => {
     const matchSearch =
       t.name.toLowerCase().includes(search.toLowerCase()) ||
-      t.subject.toLowerCase().includes(search.toLowerCase());
+      t.subject?.toLowerCase().includes(search.toLowerCase());
     const matchFilter = filter === "All" || t.status === filter;
     return matchSearch && matchFilter;
   });
+
+  if (loading) return <div style={{ padding: "2rem" }}>Loading tutors...</div>;
 
   return (
     <div className="admin-layout">
@@ -59,32 +75,44 @@ export default function AdminTutors() {
           <table className="admin-table">
             <thead>
               <tr>
-                <th>Tutor</th><th>Subject</th><th>Students</th>
-                <th>Rating</th><th>Earnings</th><th>Joined</th>
+                <th>Tutor</th><th>Subject</th><th>City</th>
+                <th>Sessions</th><th>Rating</th><th>Price/hr</th>
                 <th>Status</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((t) => (
-                <tr key={t.id}>
+                <tr key={t._id}>
                   <td>
                     <div className="user-cell">
                       <div className="avatar">{t.name[0]}</div>
                       {t.name}
                     </div>
                   </td>
-                  <td>{t.subject}</td>
-                  <td>{t.students}</td>
-                  <td>⭐ {t.rating}</td>
-                  <td style={{ fontWeight: 600, color: "var(--orange)" }}>{t.earnings}</td>
-                  <td>{t.joined}</td>
+                  <td>{t.subject || '—'}</td>
+                  <td>{t.city || '—'}</td>
+                  <td>{t.sessions || 0}</td>
+                  <td>⭐ {t.rating || 0}</td>
+                  <td style={{ color: "var(--orange)", fontWeight: 600 }}>
+                    Rs {t.price || 0}
+                  </td>
                   <td>
-                    <span className={`badge badge-${t.status.toLowerCase()}`}>{t.status}</span>
+                    <span className={`badge badge-${t.status.toLowerCase()}`}>
+                      {t.status}
+                    </span>
                   </td>
                   <td>
                     <div className="action-btns">
-                      <button className="btn-action view">View</button>
-                      <button className="btn-action suspend">
+                      <button
+                        className="btn-action view"
+                        onClick={() => setSelectedTutor(t)}
+                      >
+                        View
+                      </button>
+                      <button
+                        className="btn-action suspend"
+                        onClick={() => handleSuspend(t)}
+                      >
                         {t.status === "Active" ? "Suspend" : "Activate"}
                       </button>
                     </div>
@@ -95,6 +123,10 @@ export default function AdminTutors() {
           </table>
         </div>
       </main>
+
+      {selectedTutor && (
+        <UserModal user={selectedTutor} onClose={() => setSelectedTutor(null)} />
+      )}
     </div>
   );
 }

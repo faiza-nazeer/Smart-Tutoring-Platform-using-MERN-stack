@@ -23,7 +23,7 @@ function Hero() {
         </p>
 
         <div className="hero__ctas">
-          <a href="/courses" className="hero__cta-btn hero__cta-btn--primary">
+          <a href="/dashboard/find-tutors" className="hero__cta-btn hero__cta-btn--primary">
             Find a Tutor
           </a>
           <a href="/signup?role=tutor" className="hero__cta-btn hero__cta-btn--outline">

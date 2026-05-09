@@ -1,32 +1,45 @@
-// src/pages/AdminDashboard.tsx
+import { useState, useEffect } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import { Link } from "react-router-dom";
 import "./AdminLayout.css";
 import "./AdminDashboard.css";
-
-const stats = [
-  { label: "Total Users", value: "3,482", icon: "👥", trend: "+12%", color: "purple" },
-  { label: "Active Tutors", value: "186", icon: "🎓", trend: "+5%", color: "orange" },
-  { label: "Courses", value: "94", icon: "📚", trend: "+8%", color: "green" },
-  { label: "Revenue", value: "$52,300", icon: "💰", trend: "+18%", color: "blue" },
-];
-
-const recentUsers = [
-  { name: "Alice Brown", role: "Student", joined: "May 8", status: "Active" },
-  { name: "Tom Baker", role: "Tutor", joined: "May 7", status: "Pending" },
-  { name: "Carol Davis", role: "Student", joined: "May 7", status: "Active" },
-  { name: "James Rodriguez", role: "Tutor", joined: "May 6", status: "Suspended" },
-  { name: "Eva Martinez", role: "Student", joined: "May 6", status: "Active" },
-];
-
-const recentBookings = [
-  { id: "#B041", student: "Alice Brown", tutor: "Dr. Sarah Johnson", amount: "$49", status: "Confirmed" },
-  { id: "#B040", student: "Bob Smith", tutor: "Prof. Michael Chen", amount: "$74", status: "Pending" },
-  { id: "#B039", student: "Eva Martinez", tutor: "Aisha Patel", amount: "$44", status: "Completed" },
-  { id: "#B038", student: "Frank Wilson", tutor: "Tom Baker", amount: "$29", status: "Cancelled" },
-];
+import { getUsers, getBookings, getCourses } from "../api/api";
+import AdminCharts from "../components/AdminCharts";
 
 export default function AdminDashboard() {
+  const [users, setUsers] = useState<any[]>([]);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [courses, setCourses] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([getUsers(), getBookings(), getCourses()])
+      .then(([usersData, bookingsData, coursesData]) => {
+        setUsers(usersData);
+        setBookings(bookingsData);
+        setCourses(coursesData);
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const totalStudents = users.filter(u => u.role === "student").length;
+  const totalTutors = users.filter(u => u.role === "tutor").length;
+  const recentUsers = [...users].reverse().slice(0, 5);
+  const recentBookings = [...bookings].reverse().slice(0, 4);
+
+  const stats = [
+    { label: "Total Users", value: users.length, icon: "👥", color: "purple" },
+    { label: "Active Tutors", value: totalTutors, icon: "🎓", color: "orange" },
+    { label: "Courses", value: courses.length, icon: "📚", color: "green" },
+    { label: "Bookings", value: bookings.length, icon: "📅", color: "blue" },
+  ];
+
+  if (loading) return <div style={{ padding: "2rem" }}>Loading dashboard...</div>;
+
   return (
     <div className="admin-layout">
       <AdminSidebar />
@@ -36,7 +49,9 @@ export default function AdminDashboard() {
             <h1>Dashboard Overview</h1>
             <p>Welcome back, Admin! Here's what's happening today.</p>
           </div>
-          <div className="header-date">📅 May 8, 2026</div>
+          <div className="header-date">
+            📅 {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}
+          </div>
         </div>
 
         <div className="stats-grid">
@@ -47,7 +62,6 @@ export default function AdminDashboard() {
                 <div className="stat-value">{s.value}</div>
                 <div className="stat-label">{s.label}</div>
               </div>
-              <div className="stat-trend">{s.trend}</div>
             </div>
           ))}
         </div>
@@ -60,20 +74,26 @@ export default function AdminDashboard() {
             </div>
             <table className="admin-table">
               <thead>
-                <tr><th>Name</th><th>Role</th><th>Joined</th><th>Status</th></tr>
+                <tr>
+                  <th>Name</th><th>Role</th><th>City</th><th>Status</th>
+                </tr>
               </thead>
               <tbody>
                 {recentUsers.map((u) => (
-                  <tr key={u.name}>
+                  <tr key={u._id}>
                     <td>
                       <div className="user-cell">
                         <div className="avatar">{u.name[0]}</div>
                         {u.name}
                       </div>
                     </td>
-                    <td><span className={`role-badge role-${u.role.toLowerCase()}`}>{u.role}</span></td>
-                    <td>{u.joined}</td>
-                    <td><span className={`badge badge-${u.status.toLowerCase()}`}>{u.status}</span></td>
+                    <td>
+                      <span className={`role-badge role-${u.role}`}>{u.role}</span>
+                    </td>
+                    <td>{u.city || '—'}</td>
+                    <td>
+                      <span className={`badge badge-${u.status.toLowerCase()}`}>{u.status}</span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -87,16 +107,22 @@ export default function AdminDashboard() {
             </div>
             <table className="admin-table">
               <thead>
-                <tr><th>ID</th><th>Student</th><th>Amount</th><th>Status</th></tr>
+                <tr>
+                  <th>Student</th><th>Tutor</th><th>Amount</th><th>Status</th>
+                </tr>
               </thead>
               <tbody>
                 {recentBookings.map((b) => (
-                  <tr key={b.id}>
-                    <td><code className="booking-id">{b.id}</code></td>
-                    <td>{b.student}</td>
-                    <td style={{ fontWeight: 600, color: "var(--orange)" }}>{b.amount}</td>
+                  <tr key={b._id}>
+                    <td>{b.student?.name}</td>
+                    <td>{b.tutor?.name}</td>
+                    <td style={{ fontWeight: 600, color: "var(--orange)" }}>
+                      Rs {b.amount}
+                    </td>
                     <td>
-                      <span className={`badge badge-${b.status.toLowerCase()}`}>{b.status}</span>
+                      <span className={`badge badge-${b.status.toLowerCase()}`}>
+                        {b.status}
+                      </span>
                     </td>
                   </tr>
                 ))}
@@ -109,9 +135,9 @@ export default function AdminDashboard() {
           <h3>Quick Actions</h3>
           <div className="quick-links-grid">
             {[
-              { to: "/dashboard/admin/tutors", icon: "🎓", label: "Manage Tutors" },
+              { to: "/dashboard/admin/users", icon: "👥", label: "Manage Users" },
               { to: "/dashboard/admin/courses", icon: "📚", label: "Review Courses" },
-              { to: "/dashboard/admin/earnings", icon: "💰", label: "View Earnings" },
+              { to: "/dashboard/admin/bookings", icon: "📅", label: "View Bookings" },
               { to: "/dashboard/admin/settings", icon: "⚙️", label: "Settings" },
             ].map((q) => (
               <Link key={q.to} to={q.to} className="quick-link-card">
@@ -121,6 +147,11 @@ export default function AdminDashboard() {
             ))}
           </div>
         </div>
+        <AdminCharts
+          bookings={bookings}
+          users={users}
+          courses={courses}
+        />
       </main>
     </div>
   );

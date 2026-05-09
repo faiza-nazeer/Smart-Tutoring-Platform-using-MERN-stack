@@ -1,41 +1,44 @@
-// src/pages/AdminEarnings.tsx
+import { useEffect, useState } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import "./AdminLayout.css";
 import "./AdminEarnings.css";
-
-const kpis = [
-  { label: "Total Revenue", value: "$52,300", icon: "💰", trend: "+18%", color: "purple" },
-  { label: "Tutor Payouts", value: "$39,225", icon: "💸", trend: "+15%", color: "orange" },
-  { label: "Net Platform Revenue", value: "$13,075", icon: "📈", trend: "+22%", color: "green" },
-  { label: "Total Transactions", value: "574", icon: "🔄", trend: "+9%", color: "blue" },
-];
-
-const monthlyData = [
-  { month: "Jan", revenue: 8400, payouts: 6300 },
-  { month: "Feb", revenue: 9200, payouts: 6900 },
-  { month: "Mar", revenue: 11000, payouts: 8250 },
-  { month: "Apr", revenue: 10500, payouts: 7875 },
-  { month: "May", revenue: 13200, payouts: 9900 },
-];
-
-const topTutors = [
-  { name: "Dr. Sarah Johnson", subject: "Math", earnings: "$3,240", sessions: 68 },
-  { name: "Aisha Patel", subject: "Biology", earnings: "$2,420", sessions: 55 },
-  { name: "Prof. Michael Chen", subject: "Physics", earnings: "$2,180", sessions: 49 },
-  { name: "Tom Baker", subject: "CS", earnings: "$1,940", sessions: 67 },
-  { name: "Emma Williams", subject: "English", earnings: "$1,650", sessions: 42 },
-];
-
-const transactions = [
-  { id: "#T001", student: "Alice Brown", tutor: "Dr. Sarah Johnson", amount: "$49", fee: "$7", payout: "$42", date: "May 8" },
-  { id: "#T002", student: "Bob Smith", tutor: "Prof. Michael Chen", amount: "$74", fee: "$11", payout: "$63", date: "May 8" },
-  { id: "#T003", student: "Eva Martinez", tutor: "Aisha Patel", amount: "$44", fee: "$7", payout: "$37", date: "May 7" },
-  { id: "#T004", student: "Frank Wilson", tutor: "Tom Baker", amount: "$29", fee: "$4", payout: "$25", date: "May 7" },
-];
-
-const maxRevenue = Math.max(...monthlyData.map((d) => d.revenue));
-
+import { getBookings, getUsers } from "../api/api";
+import AdminCharts from "../components/AdminCharts";
 export default function AdminEarnings() {
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [tutors, setTutors] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    Promise.all([getBookings(), getUsers()])
+      .then(([bookingsData, usersData]) => {
+        setBookings(bookingsData);
+        setTutors(usersData.filter((u: any) => u.role === "tutor"));
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const totalRevenue = bookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+  const platformFee = Math.round(totalRevenue * 0.15);
+  const tutorPayouts = totalRevenue - platformFee;
+  const completedBookings = bookings.filter(b => b.status === "Completed");
+  const pendingBookings = bookings.filter(b => b.status === "Pending");
+
+  const kpis = [
+    { label: "Total Revenue", value: `Rs ${totalRevenue.toLocaleString()}`, icon: "💰", color: "purple" },
+    { label: "Tutor Payouts", value: `Rs ${tutorPayouts.toLocaleString()}`, icon: "💸", color: "orange" },
+    { label: "Platform Revenue", value: `Rs ${platformFee.toLocaleString()}`, icon: "📈", color: "green" },
+    { label: "Total Transactions", value: bookings.length, icon: "🔄", color: "blue" },
+  ];
+
+  const recentTransactions = [...bookings].reverse().slice(0, 5);
+
+  if (loading) return <div style={{ padding: "2rem" }}>Loading earnings...</div>;
+
   return (
     <div className="admin-layout">
       <AdminSidebar />
@@ -56,43 +59,50 @@ export default function AdminEarnings() {
                 <div className="kpi-value">{k.value}</div>
                 <div className="kpi-label">{k.label}</div>
               </div>
-              <div className="kpi-trend">{k.trend}</div>
             </div>
           ))}
         </div>
 
         <div className="earnings-grid">
           <div className="admin-card chart-card">
-            <h3>Monthly Revenue</h3>
-            <div className="bar-chart">
-              {monthlyData.map((d) => (
-                <div key={d.month} className="bar-group">
-                  <div className="bars">
-                    <div className="bar bar-revenue" style={{ height: `${(d.revenue / maxRevenue) * 160}px` }} title={`$${d.revenue}`} />
-                    <div className="bar bar-payout" style={{ height: `${(d.payouts / maxRevenue) * 160}px` }} title={`$${d.payouts}`} />
+            <h3>Booking Status Overview</h3>
+            <div style={{ padding: "1rem 0" }}>
+              {[
+                { label: "Completed", count: completedBookings.length, color: "#27ae60" },
+                { label: "Pending", count: pendingBookings.length, color: "var(--orange)" },
+                { label: "Confirmed", count: bookings.filter(b => b.status === "Confirmed").length, color: "var(--purple)" },
+                { label: "Cancelled", count: bookings.filter(b => b.status === "Cancelled").length, color: "#e74c3c" },
+              ].map(item => (
+                <div key={item.label} style={{ marginBottom: "1rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.4rem", fontSize: "0.88rem" }}>
+                    <span>{item.label}</span>
+                    <span style={{ fontWeight: 600 }}>{item.count}</span>
                   </div>
-                  <div className="bar-label">{d.month}</div>
+                  <div style={{ height: 8, background: "#ebebf5", borderRadius: 10, overflow: "hidden" }}>
+                    <div style={{
+                      height: "100%",
+                      width: bookings.length ? `${(item.count / bookings.length) * 100}%` : "0%",
+                      background: item.color,
+                      borderRadius: 10
+                    }} />
+                  </div>
                 </div>
               ))}
-            </div>
-            <div className="chart-legend">
-              <span className="legend-item purple">■ Revenue</span>
-              <span className="legend-item orange">■ Payouts</span>
             </div>
           </div>
 
           <div className="admin-card" style={{ padding: 20 }}>
             <h3>Top Earning Tutors</h3>
             <div className="top-tutors">
-              {topTutors.map((t, i) => (
-                <div key={t.name} className="tutor-earn-row">
+              {tutors.slice(0, 5).map((t, i) => (
+                <div key={t._id} className="tutor-earn-row">
                   <div className="earn-rank">{i + 1}</div>
                   <div className="avatar">{t.name[0]}</div>
                   <div className="earn-info">
                     <div className="earn-name">{t.name}</div>
                     <div className="earn-sub">{t.subject} · {t.sessions} sessions</div>
                   </div>
-                  <div className="earn-amount">{t.earnings}</div>
+                  <div className="earn-amount">Rs {t.price * (t.sessions || 0)}</div>
                 </div>
               ))}
             </div>
@@ -102,27 +112,36 @@ export default function AdminEarnings() {
         <div className="admin-card" style={{ marginTop: 20, padding: 0, overflow: "hidden" }}>
           <div style={{ padding: "20px 20px 0", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
             <h3 style={{ margin: 0 }}>Recent Transactions</h3>
-            <button className="btn-secondary">View All</button>
           </div>
           <table className="admin-table">
             <thead>
-              <tr><th>ID</th><th>Student</th><th>Tutor</th><th>Total</th><th>Platform Fee</th><th>Tutor Gets</th><th>Date</th></tr>
+              <tr>
+                <th>Student</th><th>Tutor</th><th>Subject</th>
+                <th>Total</th><th>Platform Fee</th><th>Tutor Gets</th><th>Status</th>
+              </tr>
             </thead>
             <tbody>
-              {transactions.map((t) => (
-                <tr key={t.id}>
-                  <td><code className="booking-id">{t.id}</code></td>
-                  <td>{t.student}</td>
-                  <td>{t.tutor}</td>
-                  <td style={{ fontWeight: 600 }}>{t.amount}</td>
-                  <td style={{ color: "var(--orange)" }}>{t.fee}</td>
-                  <td style={{ color: "#2e7d32", fontWeight: 600 }}>{t.payout}</td>
-                  <td style={{ color: "var(--light-gray)" }}>{t.date}</td>
+              {recentTransactions.map((b) => (
+                <tr key={b._id}>
+                  <td>{b.student?.name}</td>
+                  <td>{b.tutor?.name}</td>
+                  <td>{b.subject}</td>
+                  <td style={{ fontWeight: 600 }}>Rs {b.amount}</td>
+                  <td style={{ color: "var(--orange)" }}>Rs {Math.round(b.amount * 0.15)}</td>
+                  <td style={{ color: "#2e7d32", fontWeight: 600 }}>Rs {Math.round(b.amount * 0.85)}</td>
+                  <td>
+                    <span className={`badge badge-${b.status.toLowerCase()}`}>{b.status}</span>
+                  </td>
                 </tr>
               ))}
-            </tbody>
+            </tbody>s
           </table>
         </div>
+        <AdminCharts
+          bookings={bookings}
+          users={tutors}
+          courses={[]}
+        />
       </main>
     </div>
   );

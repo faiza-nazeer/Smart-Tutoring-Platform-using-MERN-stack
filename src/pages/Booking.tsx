@@ -1,6 +1,7 @@
 import './Booking.css'
 import Navbar from '../components/Navbar'
 import { useState } from 'react'
+import { createBooking } from '../api/api'
 
 const timeSlots = ['9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM']
 const subjects = ['Algebra', 'Calculus', 'Statistics', 'Geometry', 'Trigonometry']
@@ -12,11 +13,32 @@ function Booking() {
   const [sessionType, setSessionType] = useState<'online' | 'in-person'>('online')
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedDate || !selectedTime || !selectedSubject) return
-    setSubmitted(true)
+
+    setLoading(true)
+    try {
+      await createBooking({
+        // hardcoded for now until we add login
+        student: '69ff363e4d4013ab41276b92',  // Ahmed Khan
+        tutor: '69ff36df4d4013ab41276b93',    // Ayesha Khan
+        subject: selectedSubject,
+        date: selectedDate,
+        time: selectedTime,
+        sessionType: sessionType,
+        duration: '1 hr',
+        amount: 1500,
+        notes: notes,
+        status: 'Pending'
+      })
+      setSubmitted(true)
+    } catch (err) {
+      console.error(err)
+    }
+    setLoading(false)
   }
 
   if (submitted) {
@@ -28,7 +50,7 @@ function Booking() {
             <div className="booking__success-icon">🎉</div>
             <h2 className="booking__success-title">Booking Confirmed!</h2>
             <p className="booking__success-text">
-              Your session with <strong>Dr. Sarah Johnson</strong> has been booked for{' '}
+              Your session with <strong>Ayesha Khan</strong> has been booked for{' '}
               <strong>{selectedDate}</strong> at <strong>{selectedTime}</strong>.
             </p>
             <p className="booking__success-sub">A confirmation has been sent to your email.</p>
@@ -50,15 +72,12 @@ function Booking() {
       <div className="booking">
         <div className="booking__header">
           <h1 className="booking__title">Book a Session</h1>
-          <p className="booking__subtitle">Schedule a 1-on-1 session with Dr. Sarah Johnson</p>
+          <p className="booking__subtitle">Schedule a 1-on-1 session with Ayesha Khan</p>
         </div>
 
         <div className="booking__layout">
-
-          {/* ── Form ── */}
           <form className="booking__form" onSubmit={handleSubmit}>
 
-            {/* Subject */}
             <div className="booking__field">
               <label className="booking__label">Select Subject</label>
               <div className="booking__subject-grid">
@@ -75,7 +94,6 @@ function Booking() {
               </div>
             </div>
 
-            {/* Session Type */}
             <div className="booking__field">
               <label className="booking__label">Session Type</label>
               <div className="booking__type-toggle">
@@ -96,7 +114,6 @@ function Booking() {
               </div>
             </div>
 
-            {/* Date */}
             <div className="booking__field">
               <label className="booking__label" htmlFor="date">Select Date</label>
               <input
@@ -109,7 +126,6 @@ function Booking() {
               />
             </div>
 
-            {/* Time Slots */}
             <div className="booking__field">
               <label className="booking__label">Select Time</label>
               <div className="booking__time-grid">
@@ -126,7 +142,6 @@ function Booking() {
               </div>
             </div>
 
-            {/* Notes */}
             <div className="booking__field">
               <label className="booking__label" htmlFor="notes">Additional Notes (optional)</label>
               <textarea
@@ -139,18 +154,17 @@ function Booking() {
               />
             </div>
 
-            <button type="submit" className="booking__submit-btn">
-              Confirm Booking
+            <button type="submit" className="booking__submit-btn" disabled={loading}>
+              {loading ? 'Booking...' : 'Confirm Booking'}
             </button>
           </form>
 
-          {/* ── Summary Card ── */}
           <div className="booking__summary">
             <h3 className="booking__summary-title">Booking Summary</h3>
             <div className="booking__summary-tutor">
               <div className="booking__summary-avatar">👩‍🏫</div>
               <div>
-                <p className="booking__summary-name">Dr. Sarah Johnson</p>
+                <p className="booking__summary-name">Ayesha Khan</p>
                 <p className="booking__summary-role">Mathematics Tutor</p>
               </div>
             </div>
@@ -173,11 +187,10 @@ function Booking() {
               </div>
               <div className="booking__summary-row booking__summary-row--total">
                 <span className="booking__summary-key">Total</span>
-                <span className="booking__summary-total">$45.00</span>
+                <span className="booking__summary-total">Rs 1,500</span>
               </div>
             </div>
           </div>
-
         </div>
       </div>
       <footer className="footer">

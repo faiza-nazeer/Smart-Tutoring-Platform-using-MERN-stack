@@ -1,0 +1,65 @@
+const express = require('express');
+const router = express.Router();
+const Course = require('../models/Course');
+
+// GET all courses
+router.get('/', async (req, res) => {
+  try {
+    const courses = await Course.find().populate('tutor', 'name email');
+    res.json(courses);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// GET single course
+router.get('/:id', async (req, res) => {
+  try {
+    const course = await Course.findById(req.params.id).populate('tutor', 'name email');
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    res.json(course);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// POST create course
+router.post('/', async (req, res) => {
+  try {
+    const course = new Course(req.body);
+    const saved = await course.save();
+    res.status(201).json(saved);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+// POST bulk create courses
+router.post('/bulk', async (req, res) => {
+  try {
+    const courses = await Course.insertMany(req.body);
+    res.status(201).json(courses);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+// PUT update course
+router.put('/:id', async (req, res) => {
+  try {
+    const updated = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ message: err.message });
+  }
+});
+
+// DELETE course
+router.delete('/:id', async (req, res) => {
+  try {
+    await Course.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Course deleted' });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+module.exports = router;

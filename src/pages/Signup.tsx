@@ -1,8 +1,9 @@
-// Signup.tsx
 import './Signup.css'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import { useAuth } from '../context/AuthContext'
+import { registerUser } from '../api/api'
 
 type Role = 'student' | 'tutor'
 
@@ -11,17 +12,37 @@ function Signup() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [subject, setSubject] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: connect to backend signup API
-    if (role === 'student') {
-      navigate('/dashboard/student')
-    } else {
-      navigate('/dashboard/tutor')
+    setError('')
+    setLoading(true)
+    try {
+      const data = await registerUser({
+        name,
+        email,
+        password,
+        role,
+        subject: role === 'tutor' ? subject : undefined,
+      })
+      if (data.message) {
+        setError(data.message)
+        setLoading(false)
+        return
+      }
+      login(data.user, data.token)
+      if (role === 'tutor') navigate('/dashboard/tutor')
+      else navigate('/dashboard/student')
+    } catch (err) {
+      setError('Something went wrong. Please try again.')
     }
+    setLoading(false)
   }
 
   return (
@@ -150,7 +171,12 @@ function Signup() {
               {role === 'tutor' && (
                 <div className="signup-form__group">
                   <label className="signup-form__label">Subject you teach</label>
-                  <select className="signup-form__input signup-form__select">
+                  <select
+                    className="signup-form__input signup-form__select"
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    required
+                  >
                     <option value="">Select a subject</option>
                     <option>Mathematics</option>
                     <option>Physics</option>
@@ -164,8 +190,24 @@ function Signup() {
                 </div>
               )}
 
-              <button type="submit" className="signup-form__submit">
-                {role === 'student' ? 'Sign Up as Student' : 'Sign Up as Tutor'}
+              {error && (
+                <div style={{
+                  background: '#fdecea', color: '#e74c3c',
+                  padding: '0.75rem 1rem', borderRadius: 8,
+                  fontSize: '0.88rem', fontWeight: 500
+                }}>
+                  ⚠️ {error}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="signup-form__submit"
+              >
+                {loading ? 'Creating account...' : (
+                  role === 'student' ? 'Sign Up as Student' : 'Sign Up as Tutor'
+                )}
               </button>
 
               <p className="signup-form__terms">

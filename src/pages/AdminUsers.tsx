@@ -1,23 +1,40 @@
-// src/pages/AdminUsers.tsx
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import "./AdminLayout.css";
 import "./AdminUsers.css";
-
-const users = [
-  { id: 1, name: "Alice Brown", email: "alice@email.com", role: "Student", joined: "Jan 2024", status: "Active", courses: 4 },
-  { id: 2, name: "Tom Baker", email: "tom@email.com", role: "Tutor", joined: "Feb 2024", status: "Pending", courses: 3 },
-  { id: 3, name: "Carol Davis", email: "carol@email.com", role: "Student", joined: "Mar 2024", status: "Active", courses: 2 },
-  { id: 4, name: "James Rodriguez", email: "james@email.com", role: "Tutor", joined: "Apr 2024", status: "Suspended", courses: 1 },
-  { id: 5, name: "Eva Martinez", email: "eva@email.com", role: "Student", joined: "Jan 2024", status: "Active", courses: 6 },
-  { id: 6, name: "Frank Wilson", email: "frank@email.com", role: "Student", joined: "May 2024", status: "Active", courses: 1 },
-  { id: 7, name: "Dr. Sarah Johnson", email: "sarah@email.com", role: "Tutor", joined: "Jan 2024", status: "Active", courses: 5 },
-  { id: 8, name: "Bob Smith", email: "bob@email.com", role: "Student", joined: "Mar 2024", status: "Active", courses: 3 },
-];
+import { getUsers, updateUser, deleteUser } from "../api/api";
+import UserModal from "../components/UserModal";
 
 export default function AdminUsers() {
+  const [users, setUsers] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("All");
+  const [loading, setLoading] = useState(true);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
+
+  useEffect(() => {
+    getUsers()
+      .then((data: any[]) => {
+        setUsers(data);
+        setLoading(false);
+      })
+      .catch((err: any) => {
+        console.error(err);
+        setLoading(false);
+      });
+  }, []);
+
+  const handleSuspend = async (user: any) => {
+    const newStatus = user.status === "Active" ? "Suspended" : "Active";
+    const updated = await updateUser(user._id, { status: newStatus });
+    setUsers(prev => prev.map(u => u._id === user._id ? { ...u, status: updated.status } : u));
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm("Are you sure you want to delete this user?")) return;
+    await deleteUser(id);
+    setUsers(prev => prev.filter(u => u._id !== id));
+  };
 
   const filtered = users.filter((u) => {
     const matchSearch =
@@ -27,6 +44,8 @@ export default function AdminUsers() {
       filter === "All" || u.role === filter || u.status === filter;
     return matchSearch && matchFilter;
   });
+
+  if (loading) return <div style={{ padding: "2rem" }}>Loading users...</div>;
 
   return (
     <div className="admin-layout">
@@ -49,7 +68,7 @@ export default function AdminUsers() {
             className="search-input"
           />
           <div className="filter-tabs">
-            {["All", "Student", "Tutor", "Active", "Suspended", "Pending"].map((f) => (
+            {["All", "student", "tutor", "Active", "Suspended", "Pending"].map((f) => (
               <button
                 key={f}
                 className={`filter-tab ${filter === f ? "active" : ""}`}
@@ -64,12 +83,12 @@ export default function AdminUsers() {
             <thead>
               <tr>
                 <th>User</th><th>Email</th><th>Role</th>
-                <th>Courses</th><th>Joined</th><th>Status</th><th>Actions</th>
+                <th>City</th><th>Joined</th><th>Status</th><th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.map((u) => (
-                <tr key={u.id}>
+                <tr key={u._id}>
                   <td>
                     <div className="user-cell">
                       <div className="avatar">{u.name[0]}</div>
@@ -78,19 +97,32 @@ export default function AdminUsers() {
                   </td>
                   <td style={{ color: "var(--gray)" }}>{u.email}</td>
                   <td>
-                    <span className={`role-badge role-${u.role.toLowerCase()}`}>{u.role}</span>
+                    <span className={`role-badge role-${u.role}`}>{u.role}</span>
                   </td>
-                  <td>{u.courses}</td>
-                  <td>{u.joined}</td>
+                  <td>{u.city || '—'}</td>
+                  <td>{new Date(u.createdAt).toLocaleDateString()}</td>
                   <td>
                     <span className={`badge badge-${u.status.toLowerCase()}`}>{u.status}</span>
                   </td>
                   <td>
                     <div className="action-btns">
-                      <button className="btn-action view">View</button>
-                      <button className="btn-action edit">Edit</button>
-                      <button className="btn-action suspend">
+                      <button
+                        className="btn-action view"
+                        onClick={() => setSelectedUser(u)}
+                      >
+                        View
+                      </button>
+                      <button
+                        className="btn-action suspend"
+                        onClick={() => handleSuspend(u)}
+                      >
                         {u.status === "Active" ? "Suspend" : "Activate"}
+                      </button>
+                      <button
+                        className="btn-action edit"
+                        onClick={() => handleDelete(u._id)}
+                      >
+                        Delete
                       </button>
                     </div>
                   </td>
@@ -100,6 +132,10 @@ export default function AdminUsers() {
           </table>
         </div>
       </main>
+
+      {selectedUser && (
+        <UserModal user={selectedUser} onClose={() => setSelectedUser(null)} />
+      )}
     </div>
   );
 }

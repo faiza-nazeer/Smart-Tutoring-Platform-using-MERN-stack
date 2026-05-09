@@ -1,23 +1,39 @@
-// Login.tsx
 import './Login.css'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
+import { useAuth } from '../context/AuthContext'
+import { loginUser } from '../api/api'
 
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [role, setRole] = useState<'student' | 'tutor' | 'admin'>('student')
+  const [error, setError] = useState('')
+  const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
+  const { login } = useAuth()
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // TODO: connect to backend login API
-    // When backend is ready, check role from response and navigate accordingly
-    if (role === 'tutor')       navigate('/dashboard/tutor')
-    else if (role === 'admin')  navigate('/dashboard/admin')
-    else                        navigate('/dashboard/student')
+    setError('')
+    setLoading(true)
+    try {
+      const data = await loginUser(email, password)
+      if (data.message) {
+        setError(data.message)
+        setLoading(false)
+        return
+      }
+      login(data.user, data.token)
+      if (data.user.role === 'tutor') navigate('/dashboard/tutor')
+      else if (data.user.role === 'admin') navigate('/dashboard/admin')
+      else navigate('/dashboard/student')
+    } catch (err) {
+      setError('Something went wrong. Please try again.')
+    }
+    setLoading(false)
   }
 
   return (
@@ -134,13 +150,28 @@ function Login() {
                 </div>
               </div>
 
+              {error && (
+                <div style={{
+                  background: '#fdecea', color: '#e74c3c',
+                  padding: '0.75rem 1rem', borderRadius: 8,
+                  fontSize: '0.88rem', fontWeight: 500
+                }}>
+                  ⚠️ {error}
+                </div>
+              )}
+
               <button
                 type="submit"
+                disabled={loading}
                 className={`login-form__submit ${role === 'admin' ? 'login-form__submit--admin' : ''}`}
               >
-                {role === 'student' && '👨‍🎓 Log In as Student'}
-                {role === 'tutor'   && '👩‍🏫 Log In as Tutor'}
-                {role === 'admin'   && '🛡️ Log In as Admin'}
+                {loading ? 'Logging in...' : (
+                  <>
+                    {role === 'student' && '👨‍🎓 Log In as Student'}
+                    {role === 'tutor'   && '👩‍🏫 Log In as Tutor'}
+                    {role === 'admin'   && '🛡️ Log In as Admin'}
+                  </>
+                )}
               </button>
 
               <div className="login-form__divider">

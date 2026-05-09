@@ -31,7 +31,7 @@ function About() {
           Tutors get tools to manage sessions, grow their student base, and
           earn on a flexible schedule. Everyone wins.
         </p>
-        <button className="btn-primary">Learn More</button>
+        
       </div>
     </section>
   )
