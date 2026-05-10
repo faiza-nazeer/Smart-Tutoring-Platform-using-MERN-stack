@@ -2,7 +2,8 @@ import './Booking.css'
 import Navbar from '../components/Navbar'
 import { useState } from 'react'
 import { createBooking } from '../api/api'
-
+import { useAuth } from '../context/AuthContext'
+import { useParams } from 'react-router-dom'
 const timeSlots = ['9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM']
 const subjects = ['Algebra', 'Calculus', 'Statistics', 'Geometry', 'Trigonometry']
 
@@ -14,7 +15,8 @@ function Booking() {
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
-
+  const { user } = useAuth()
+  const { tutorId } = useParams()
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!selectedDate || !selectedTime || !selectedSubject) return
@@ -22,9 +24,9 @@ function Booking() {
     setLoading(true)
     try {
       await createBooking({
-        // hardcoded for now until we add login
-        student: '69ff363e4d4013ab41276b92',  // Ahmed Khan
-        tutor: '69ff36df4d4013ab41276b93',    // Ayesha Khan
+  
+        student: user._id,  
+        tutor: tutorId,   
         subject: selectedSubject,
         date: selectedDate,
         time: selectedTime,

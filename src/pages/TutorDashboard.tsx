@@ -1,33 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
 import './TutorDashboard.css';
-
-const TUTOR = { name: 'Ayesha Khan', email: 'ayesha@email.com', avatar: 'AK', subject: 'Mathematics', joinedDate: 'Mar 2024' }
-
-const STATS = [
-  { label: 'Total Students', value: '48', icon: '👨‍🎓' },
-  { label: 'Sessions Done', value: '340', icon: '✅' },
-  { label: 'Monthly Earnings', value: 'Rs 72,000', icon: '💰' },
-  { label: 'Avg Rating', value: '4.9', icon: '⭐' },
-]
-
-const UPCOMING_SESSIONS = [
-  { id: 1, student: 'Ahmed Khan', subject: 'Mathematics', date: 'Today', time: '5:00 PM', duration: '1 hr', avatar: 'AK' },
-  { id: 2, student: 'Fatima Tariq', subject: 'Mathematics', date: 'Today', time: '7:00 PM', duration: '1 hr', avatar: 'FT' },
-  { id: 3, student: 'Hassan Ali', subject: 'Mathematics', date: 'Tomorrow', time: '3:00 PM', duration: '1 hr', avatar: 'HA' },
-  { id: 4, student: 'Zara Imran', subject: 'Mathematics', date: 'Sat, 30 Apr', time: '11:00 AM', duration: '1 hr', avatar: 'ZI' },
-]
-
-const MY_COURSES = [
-  { id: 1, title: 'Master Mathematics', students: 18, progress: 75, rating: 4.9 },
-  { id: 2, title: 'Advanced Algebra', students: 12, progress: 55, rating: 4.7 },
-  { id: 3, title: 'Calculus Fundamentals', students: 18, progress: 90, rating: 4.8 },
-]
-
-const RECENT_REVIEWS = [
-  { id: 1, student: 'Ahmed Khan', avatar: 'AK', rating: 5, comment: 'Excellent teaching style, very patient and clear.', date: '2 days ago' },
-  { id: 2, student: 'Fatima Tariq', avatar: 'FT', rating: 5, comment: 'Best math tutor I have ever had!', date: '5 days ago' },
-  { id: 3, student: 'Hassan Ali', avatar: 'HA', rating: 4, comment: 'Very knowledgeable and explains concepts well.', date: '1 week ago' },
-]
+import { useAuth } from '../context/AuthContext';
+import { useEffect, useState } from 'react';
 
 const EARNINGS = [
   { month: 'Jan', amount: 55000 },
@@ -40,6 +14,49 @@ const maxEarning = Math.max(...EARNINGS.map(e => e.amount));
 
 function TutorDashboard() {
   const location = useLocation();
+  const { user, logout } = useAuth()
+  const [bookings, setBookings] = useState<any[]>([])
+  const [courses, setCourses] = useState<any[]>([])
+  const [reviews, setReviews] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      fetch('http://localhost:5000/api/bookings').then(r => r.json()),
+      fetch('http://localhost:5000/api/courses').then(r => r.json()),
+      fetch('http://localhost:5000/api/reviews').then(r => r.json()),
+    ]).then(([bookingsData, coursesData, reviewsData]) => {
+      // Filter data for logged in tutor
+      const myBookings = bookingsData.filter((b: any) => b.tutor?._id === user?._id)
+      const myCourses = coursesData.filter((c: any) => c.tutor?._id === user?._id)
+      const myReviews = reviewsData.filter((r: any) => r.tutor?._id === user?._id)
+      setBookings(myBookings)
+      setCourses(myCourses)
+      setReviews(myReviews)
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [user])
+
+  const TUTOR = {
+    name: user?.name || 'Tutor',
+    email: user?.email || '',
+    avatar: user?.name?.slice(0, 2).toUpperCase() || 'T',
+    subject: user?.subject || 'Subject',
+  }
+
+  const upcomingSessions = bookings.filter(b => b.status === 'Pending' || b.status === 'Confirmed')
+  const completedSessions = bookings.filter(b => b.status === 'Completed')
+  const totalStudents = new Set(bookings.map(b => b.student?._id)).size
+  const avgRating = reviews.length
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    : 'N/A'
+
+  const stats = [
+    { label: 'Total Students', value: totalStudents, icon: '👨‍🎓' },
+    { label: 'Sessions Done', value: completedSessions.length, icon: '✅' },
+    { label: 'Total Bookings', value: bookings.length, icon: '📅' },
+    { label: 'Avg Rating', value: avgRating, icon: '⭐' },
+  ]
 
   const navLinks = [
     { to: '/dashboard/tutor', label: '🏠 Dashboard' },
@@ -48,16 +65,15 @@ function TutorDashboard() {
     { to: '/dashboard/tutor/students', label: '👨‍🎓 My Students' },
     { to: '/dashboard/tutor/earnings', label: '💰 Earnings' },
     { to: '/dashboard/tutor/profile', label: '👤 My Profile' },
-    { to: '/dashboard/tutor/settings', label: '⚙️ Settings' },
     { to: '/dashboard/tutor/reviews', label: '⭐ Reviews' },
   ]
 
+  if (loading) return <div style={{ padding: '2rem' }}>Loading dashboard...</div>
+
   return (
     <div className="td-page">
-
       <div className="td-body">
 
-        {/* Sidebar */}
         <aside className="td-sidebar">
           <div className="td-logo">🎓 ETutor</div>
 
@@ -80,13 +96,16 @@ function TutorDashboard() {
             ))}
           </nav>
 
-          <Link to="/login" className="td-logout-btn">Log Out</Link>
+          <button
+            className="td-logout-btn"
+            onClick={() => { logout(); window.location.href = '/login'; }}
+          >
+            Log Out
+          </button>
         </aside>
 
-        {/* Main */}
         <main className="td-main">
 
-          {/* Welcome */}
           <div className="td-welcome">
             <div>
               <h1>Welcome back, {TUTOR.name.split(' ')[0]}! 👋</h1>
@@ -95,9 +114,8 @@ function TutorDashboard() {
             <button className="td-availability-btn">✅ Available for Booking</button>
           </div>
 
-          {/* Stats */}
           <div className="td-stats-row">
-            {STATS.map(stat => (
+            {stats.map(stat => (
               <div className="td-stat-card" key={stat.label}>
                 <span className="td-stat-card__icon">{stat.icon}</span>
                 <span className="td-stat-card__value">{stat.value}</span>
@@ -106,7 +124,6 @@ function TutorDashboard() {
             ))}
           </div>
 
-          {/* Two columns */}
           <div className="td-cols">
 
             {/* Upcoming Sessions */}
@@ -116,20 +133,28 @@ function TutorDashboard() {
                 <Link to="/dashboard/tutor/sessions" className="td-section__link">View all</Link>
               </div>
               <div className="td-sessions">
-                {UPCOMING_SESSIONS.map(s => (
-                  <div className="td-session-card" key={s.id}>
-                    <div className="td-avatar">{s.avatar}</div>
-                    <div className="td-session-card__info">
-                      <p className="td-session-card__name">{s.student}</p>
-                      <p className="td-session-card__subject">{s.subject}</p>
-                    </div>
-                    <div className="td-session-card__time">
-                      <p className="td-session-card__date">{s.date}</p>
-                      <p>{s.time} · {s.duration}</p>
-                    </div>
-                    <button className="td-start-btn">Start</button>
+                {upcomingSessions.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--gray)' }}>
+                    <p>No upcoming sessions yet</p>
                   </div>
-                ))}
+                ) : (
+                  upcomingSessions.map((s: any) => (
+                    <div className="td-session-card" key={s._id}>
+                      <div className="td-avatar">
+                        {s.student?.name?.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="td-session-card__info">
+                        <p className="td-session-card__name">{s.student?.name}</p>
+                        <p className="td-session-card__subject">{s.subject}</p>
+                      </div>
+                      <div className="td-session-card__time">
+                        <p className="td-session-card__date">{s.date}</p>
+                        <p>{s.time} · {s.duration}</p>
+                      </div>
+                      <button className="td-start-btn">Start</button>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
@@ -157,7 +182,6 @@ function TutorDashboard() {
 
           </div>
 
-          {/* Bottom two columns */}
           <div className="td-cols">
 
             {/* My Courses */}
@@ -167,23 +191,24 @@ function TutorDashboard() {
                 <Link to="/dashboard/tutor/courses" className="td-section__link">View all</Link>
               </div>
               <div className="td-courses">
-                {MY_COURSES.map(c => (
-                  <div className="td-course-card" key={c.id}>
-                    <div className="td-course-card__info">
-                      <h4>{c.title}</h4>
-                      <p>{c.students} students enrolled · ⭐ {c.rating}</p>
-                    </div>
-                    <div className="td-course-card__progress">
-                      <div className="td-progress-label">
-                        <span>Progress</span>
-                        <span>{c.progress}%</span>
-                      </div>
-                      <div className="td-progress-bar">
-                        <div className="td-progress-fill" style={{ width: `${c.progress}%` }} />
-                      </div>
-                    </div>
+                {courses.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--gray)' }}>
+                    <p>No courses yet</p>
                   </div>
-                ))}
+                ) : (
+                  courses.map((c: any) => (
+                    <div className="td-course-card" key={c._id}>
+                      <div className="td-course-card__info">
+                        <h4>{c.title}</h4>
+                        <p>{c.studentsEnrolled} students enrolled · ⭐ {c.rating}</p>
+                      </div>
+                      <div className="td-progress-label">
+                        <span>Status</span>
+                        <span style={{ color: 'var(--purple)', fontWeight: 600 }}>{c.status}</span>
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
@@ -193,21 +218,31 @@ function TutorDashboard() {
                 <h2>Recent Reviews</h2>
               </div>
               <div className="td-reviews">
-                {RECENT_REVIEWS.map(r => (
-                  <div className="td-review-card" key={r.id}>
-                    <div className="td-review-card__top">
-                      <div className="td-avatar td-avatar--sm">{r.avatar}</div>
-                      <div>
-                        <p className="td-review-card__name">{r.student}</p>
-                        <p className="td-review-card__date">{r.date}</p>
-                      </div>
-                      <div className="td-review-card__stars">
-                        {'⭐'.repeat(r.rating)}
-                      </div>
-                    </div>
-                    <p className="td-review-card__comment">"{r.comment}"</p>
+                {reviews.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--gray)' }}>
+                    <p>No reviews yet</p>
                   </div>
-                ))}
+                ) : (
+                  reviews.slice(0, 3).map((r: any) => (
+                    <div className="td-review-card" key={r._id}>
+                      <div className="td-review-card__top">
+                        <div className="td-avatar td-avatar--sm">
+                          {r.student?.name?.slice(0, 2).toUpperCase()}
+                        </div>
+                        <div>
+                          <p className="td-review-card__name">{r.student?.name}</p>
+                          <p className="td-review-card__date">
+                            {new Date(r.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                        <div className="td-review-card__stars">
+                          {'⭐'.repeat(r.rating)}
+                        </div>
+                      </div>
+                      <p className="td-review-card__comment">"{r.comment}"</p>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 

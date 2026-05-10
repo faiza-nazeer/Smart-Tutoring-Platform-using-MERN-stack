@@ -92,3 +92,19 @@ export const registerUser = async (userData: object): Promise<any> => {
   });
   return res.json();
 };
+export const sendContactMessage = async (data: object): Promise<any> => {
+  const res = await fetch('http://localhost:5000/api/contact', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+};
+export const forgotPassword = async (email: string, newPassword: string): Promise<any> => {
+  const res = await fetch('http://localhost:5000/api/auth/forgot-password', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, newPassword }),
+  });
+  return res.json();
+};

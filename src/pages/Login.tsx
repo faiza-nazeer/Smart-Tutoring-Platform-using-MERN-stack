@@ -1,5 +1,5 @@
 import './Login.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Navbar from '../components/Navbar'
 import { useAuth } from '../context/AuthContext'
@@ -9,12 +9,42 @@ function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [role, setRole] = useState<'student' | 'tutor' | 'admin'>('student')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [tutorCount, setTutorCount] = useState(0)
+  const [studentCount, setStudentCount] = useState(0)
+  const [avgRating, setAvgRating] = useState(0)
   const navigate = useNavigate()
   const { login } = useAuth()
 
+
+    useEffect(() => {
+    fetch('http://localhost:5000/api/users')
+      .then(res => res.json())
+      .then((data: any[]) => {
+
+        const tutors = data.filter((user: any) => user.role === 'tutor')
+        const students = data.filter((user: any) => user.role === 'student')
+
+        setTutorCount(tutors.length)
+        setStudentCount(students.length)
+
+        const tutorsWithRating = tutors.filter(
+          (tutor: any) => tutor.rating > 0
+        )
+
+        if (tutorsWithRating.length > 0) {
+          const avg =
+            tutorsWithRating.reduce(
+              (sum: number, tutor: any) => sum + tutor.rating,
+              0
+            ) / tutorsWithRating.length
+
+          setAvgRating(Math.round(avg * 10) / 10)
+        }
+      })
+      .catch(err => console.error(err))
+  }, [])
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -39,10 +69,8 @@ function Login() {
   return (
     <div className="login-page">
       <Navbar />
-
       <div className="login-container">
 
-        {/* Left side — purple branding panel */}
         <div className="login-left">
           <div className="login-left__content">
             <div className="login-left__logo">🎓 ETutor</div>
@@ -55,28 +83,26 @@ function Login() {
               Log in to access your dashboard, sessions,
               courses, and everything ETutor has to offer.
             </p>
-
             <div className="login-left__stats">
               <div className="login-left__stat">
-                <span className="login-left__stat-value">500+</span>
-                <span className="login-left__stat-label">Tutors</span>
+               <span className="login-left__stat-value">{tutorCount}+</span>
+               <span className="login-left__stat-label">Tutors</span>
               </div>
               <div className="login-left__stat">
-                <span className="login-left__stat-value">10K+</span>
+               <span className="login-left__stat-value">{studentCount}+</span>
                 <span className="login-left__stat-label">Students</span>
+
               </div>
               <div className="login-left__stat">
-                <span className="login-left__stat-value">4.8★</span>
+                <span className="login-left__stat-value">{avgRating}★</span>
                 <span className="login-left__stat-label">Rating</span>
               </div>
             </div>
           </div>
-
           <div className="login-left__circle login-left__circle--1"></div>
           <div className="login-left__circle login-left__circle--2"></div>
         </div>
 
-        {/* Right side — login form */}
         <div className="login-right">
           <div className="login-form-wrap">
             <h1 className="login-form__heading">Log In</h1>
@@ -85,33 +111,7 @@ function Login() {
               <a href="/signup" className="login-form__link">Sign up for free</a>
             </p>
 
-            {/* Role Toggle */}
-            <div className="login-role-toggle">
-              <button
-                type="button"
-                className={`login-role-btn ${role === 'student' ? 'login-role-btn--active' : ''}`}
-                onClick={() => setRole('student')}
-              >
-                👨‍🎓 Student
-              </button>
-              <button
-                type="button"
-                className={`login-role-btn ${role === 'tutor' ? 'login-role-btn--active' : ''}`}
-                onClick={() => setRole('tutor')}
-              >
-                👩‍🏫 Tutor
-              </button>
-              <button
-                type="button"
-                className={`login-role-btn ${role === 'admin' ? 'login-role-btn--active login-role-btn--admin' : ''}`}
-                onClick={() => setRole('admin')}
-              >
-                🛡️ Admin
-              </button>
-            </div>
-
             <form className="login-form" onSubmit={handleSubmit}>
-
               <div className="login-form__group">
                 <label className="login-form__label">Email address</label>
                 <input
@@ -163,29 +163,12 @@ function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`login-form__submit ${role === 'admin' ? 'login-form__submit--admin' : ''}`}
+                className="login-form__submit"
               >
-                {loading ? 'Logging in...' : (
-                  <>
-                    {role === 'student' && '👨‍🎓 Log In as Student'}
-                    {role === 'tutor'   && '👩‍🏫 Log In as Tutor'}
-                    {role === 'admin'   && '🛡️ Log In as Admin'}
-                  </>
-                )}
+                {loading ? 'Logging in...' : '🔐 Log In'}
               </button>
 
-              <div className="login-form__divider">
-                <span>or continue with</span>
-              </div>
-
-              <div className="login-form__socials">
-                <button type="button" className="login-form__social-btn">
-                  <span>G</span> Google
-                </button>
-                <button type="button" className="login-form__social-btn">
-                  <span>f</span> Facebook
-                </button>
-              </div>
+              
 
             </form>
           </div>

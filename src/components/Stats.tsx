@@ -1,18 +1,35 @@
-// Stats.tsx
-// No CSS import here — styles come from Home.css (imported in Home.tsx)
-
-interface Stat {
-  value: string
-  label: string
-}
-
-const stats: Stat[] = [
-  { value: '500+', label: 'Verified Tutors' },
-  { value: '10K+', label: 'Students Enrolled' },
-  { value: '4.8★', label: 'Average Rating' },
-]
+import { useEffect, useState } from 'react'
 
 function Stats() {
+  const [tutorCount, setTutorCount] = useState(0)
+  const [studentCount, setStudentCount] = useState(0)
+  const [avgRating, setAvgRating] = useState(0)
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/users')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        const tutors = data.filter(u => u.role === 'tutor')
+        const students = data.filter(u => u.role === 'student')
+        setTutorCount(tutors.length)
+        setStudentCount(students.length)
+
+        // Calculate average rating from tutors
+        const tutorsWithRating = tutors.filter(t => t.rating > 0)
+        if (tutorsWithRating.length > 0) {
+          const avg = tutorsWithRating.reduce((sum, t) => sum + t.rating, 0) / tutorsWithRating.length
+          setAvgRating(Math.round(avg * 10) / 10)
+        }
+      })
+      .catch(err => console.error(err))
+  }, [])
+
+  const stats = [
+    { value: `${tutorCount}+`, label: 'Verified Tutors' },
+    { value: `${studentCount}+`, label: 'Students Enrolled' },
+    { value: `${avgRating}★`, label: 'Average Rating' },
+  ]
+
   return (
     <section className="stats">
       <div className="stats__left">

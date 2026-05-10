@@ -1,35 +1,49 @@
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import "./MySessions.css";
 
 type Session = {
-  id: number;
-  tutor: string;
+  _id: string;
+  tutor: any;
   subject: string;
-  initials: string;
   date: string;
   time: string;
   duration: string;
-  type: "upcoming" | "completed" | "cancelled";
-  topic: string;
+  status: string;
+  notes?: string;
 };
 
-const sessions: Session[] = [
-  { id: 1, tutor: "Ayesha Khan", subject: "Mathematics", initials: "AK", date: "Today", time: "5:00 PM", duration: "1 hr", type: "upcoming", topic: "Quadratic Equations" },
-  { id: 2, tutor: "Zain Ahmed", subject: "Physics", initials: "ZA", date: "Tomorrow", time: "4:00 PM", duration: "1 hr", type: "upcoming", topic: "Newton's Laws" },
-  { id: 3, tutor: "Sara Raza", subject: "English", initials: "SR", date: "Sat, 30 Apr", time: "3:00 PM", duration: "1 hr", type: "upcoming", topic: "Essay Writing" },
-  { id: 4, tutor: "Ayesha Khan", subject: "Mathematics", initials: "AK", date: "Mon, 22 Apr", time: "5:00 PM", duration: "1 hr", type: "completed", topic: "Trigonometry" },
-  { id: 5, tutor: "Zain Ahmed", subject: "Physics", initials: "ZA", date: "Fri, 19 Apr", time: "4:00 PM", duration: "1 hr", type: "completed", topic: "Optics" },
-  { id: 6, tutor: "Omar Farooq", subject: "Chemistry", initials: "OF", date: "Wed, 17 Apr", time: "6:00 PM", duration: "1 hr", type: "cancelled", topic: "Periodic Table" },
-];
-
-const typeBadge = {
-  upcoming: { label: "Upcoming", cls: "badge-upcoming" },
-  completed: { label: "Completed", cls: "badge-done" },
-  cancelled: { label: "Cancelled", cls: "badge-cancelled" },
+const typeBadge: Record<string, { label: string; cls: string }> = {
+  Confirmed: { label: "Confirmed", cls: "badge-upcoming" },
+  Pending:   { label: "Pending",   cls: "badge-upcoming" },
+  Completed: { label: "Completed", cls: "badge-done" },
+  Cancelled: { label: "Cancelled", cls: "badge-cancelled" },
 };
 
 export default function MySessions() {
-  const upcoming = sessions.filter(s => s.type === "upcoming");
-  const past = sessions.filter(s => s.type !== "upcoming");
+  const { user } = useAuth();
+  const [sessions, setSessions] = useState<Session[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/bookings')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        const mySessions = data.filter(b => b.student?._id === user?._id);
+        setSessions(mySessions);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [user]);
+
+  const upcoming = sessions.filter(s =>
+    s.status === 'Pending' || s.status === 'Confirmed'
+  );
+  const past = sessions.filter(s =>
+    s.status === 'Completed' || s.status === 'Cancelled'
+  );
+
+  if (loading) return <div style={{ padding: '2rem' }}>Loading sessions...</div>;
 
   return (
     <div className="my-sessions-page">
@@ -42,51 +56,96 @@ export default function MySessions() {
       </div>
 
       <div className="sessions-stats">
-        <div className="sstat"><span className="snum">3</span><span className="slabel">Upcoming</span></div>
-        <div className="sstat"><span className="snum">12</span><span className="slabel">Completed</span></div>
-        <div className="sstat"><span className="snum">18h</span><span className="slabel">Total Hours</span></div>
+        <div className="sstat">
+          <span className="snum">{upcoming.length}</span>
+          <span className="slabel">Upcoming</span>
+        </div>
+        <div className="sstat">
+          <span className="snum">{past.filter(s => s.status === 'Completed').length}</span>
+          <span className="slabel">Completed</span>
+        </div>
+        <div className="sstat">
+          <span className="snum">{sessions.length}</span>
+          <span className="slabel">Total</span>
+        </div>
       </div>
 
       <section className="sessions-section">
         <h2>Upcoming Sessions</h2>
-        <div className="sessions-list">
-          {upcoming.map(s => (
-            <div key={s.id} className="session-card">
-              <div className="session-avatar">{s.initials}</div>
-              <div className="session-info">
-                <h4>{s.tutor}</h4>
-                <p>{s.subject} · {s.topic}</p>
+        {upcoming.length === 0 ? (
+          <div style={{
+            textAlign: 'center', padding: '2rem',
+            background: 'white', borderRadius: 12, color: 'var(--gray)'
+          }}>
+            <p>No upcoming sessions</p>
+            <a href="/booking" style={{ color: 'var(--purple)', fontWeight: 600 }}>
+              Book a session →
+            </a>
+          </div>
+        ) : (
+          <div className="sessions-list">
+            {upcoming.map(s => (
+              <div key={s._id} className="session-card">
+                <div className="session-avatar">
+                  {s.tutor?.name?.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="session-info">
+                  <h4>{s.tutor?.name}</h4>
+                  <p>{s.subject}</p>
+                </div>
+                <div className="session-time">
+                  <span className="session-date">{s.date}</span>
+                  <span>{s.time} · {s.duration}</span>
+                </div>
+                <span className={`badge ${typeBadge[s.status]?.cls || 'badge-upcoming'}`}>
+                  {typeBadge[s.status]?.label || s.status}
+                </span>
+                <button
+                  className="join-btn"
+                  onClick={() => window.open('https://meet.google.com', '_blank')}
+                >
+                  Join
+                </button>
               </div>
-              <div className="session-time">
-                <span className="session-date">{s.date}</span>
-                <span>{s.time} · {s.duration}</span>
-              </div>
-              <span className={`badge ${typeBadge[s.type].cls}`}>{typeBadge[s.type].label}</span>
-              <button className="join-btn">Join</button>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       <section className="sessions-section">
         <h2>Past Sessions</h2>
-        <div className="sessions-list">
-          {past.map(s => (
-            <div key={s.id} className="session-card past">
-              <div className="session-avatar faded">{s.initials}</div>
-              <div className="session-info">
-                <h4>{s.tutor}</h4>
-                <p>{s.subject} · {s.topic}</p>
+        {past.length === 0 ? (
+          <div style={{
+            textAlign: 'center', padding: '2rem',
+            background: 'white', borderRadius: 12, color: 'var(--gray)'
+          }}>
+            <p>No past sessions yet</p>
+          </div>
+        ) : (
+          <div className="sessions-list">
+            {past.map(s => (
+              <div key={s._id} className="session-card past">
+                <div className="session-avatar faded">
+                  {s.tutor?.name?.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="session-info">
+                  <h4>{s.tutor?.name}</h4>
+                  <p>{s.subject}</p>
+                </div>
+                <div className="session-time">
+                  <span className="session-date">{s.date}</span>
+                  <span>{s.time} · {s.duration}</span>
+                </div>
+                <span className={`badge ${typeBadge[s.status]?.cls || 'badge-done'}`}>
+                  {typeBadge[s.status]?.label || s.status}
+                </span>
+                {s.status === 'Completed' && (
+                  <button className="review-btn">★ Rate</button>
+                )}
               </div>
-              <div className="session-time">
-                <span className="session-date">{s.date}</span>
-                <span>{s.time} · {s.duration}</span>
-              </div>
-              <span className={`badge ${typeBadge[s.type].cls}`}>{typeBadge[s.type].label}</span>
-              {s.type === "completed" && <button className="review-btn">★ Rate</button>}
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

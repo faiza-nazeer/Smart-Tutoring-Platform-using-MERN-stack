@@ -18,7 +18,6 @@ import TutorProfile from './pages/TutorProfile'
 import MyCourses from "./pages/MyCourses";
 import MySessions from "./pages/MySessions";
 import MyProfile from "./pages/MyProfile";
-import Settings from "./pages/Settings";
 import FindTutors from "./pages/FindTutors";
 import TutorDashboard from './pages/TutorDashboard';
 import TutorSessions     from './pages/TutorSessions';
@@ -34,6 +33,7 @@ import AdminBookings from "./pages/AdminBookings";
 import AdminEarnings from "./pages/AdminEarnings";
 import AdminSettings from "./pages/AdminSettings";
 import Reviews from './pages/Reviews';
+import ForgotPassword from './pages/ForgotPassword'
 
 
 function App() {
@@ -52,12 +52,14 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
         <Route path="/tutor/:id"      element={<TutorProfile />} />
+        
+        // Add inside Routes:
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         {/* Student Dashboard */}
         <Route path="/dashboard/student" element={<StudentDashboard />} />
         <Route path="/dashboard/courses" element={<MyCourses />} />
         <Route path="/dashboard/sessions" element={<MySessions />} />
         <Route path="/dashboard/profile" element={<MyProfile />} />
-        <Route path="/dashboard/settings" element={<Settings />} />
         <Route path="/dashboard/find-tutors" element={<FindTutors />} />
         <Route path="/dashboard/tutor" element={<TutorDashboard />} />
         <Route path="/dashboard/tutor/sessions"  element={<TutorSessions />} />

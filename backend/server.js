@@ -16,6 +16,7 @@ app.use('/api/courses', require('./routes/courses'));
 app.use('/api/bookings', require('./routes/bookings'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/contact', require('./routes/contact'));
 app.get('/', (req, res) => {
   res.json({ message: 'eTutor API is running' });
 });

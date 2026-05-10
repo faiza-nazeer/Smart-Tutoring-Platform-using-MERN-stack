@@ -1,26 +1,40 @@
 import './Contact.css'
 import Navbar from '../components/Navbar'
 import { useState } from 'react'
+import { sendContactMessage } from '../api/api'
 
 function Contact() {
   const [form, setForm] = useState({ name: '', email: '', subject: '', message: '' })
   const [submitted, setSubmitted] = useState(false)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value })
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.name || !form.email || !form.message) return
-    setSubmitted(true)
+    setLoading(true)
+    setError('')
+    try {
+      const data = await sendContactMessage(form)
+      if (data.message === 'Message sent successfully') {
+        setSubmitted(true)
+      } else {
+        setError(data.message || 'Something went wrong')
+      }
+    } catch (err) {
+      setError('Failed to send message. Please try again.')
+    }
+    setLoading(false)
   }
 
   return (
     <div>
       <Navbar />
 
-      {/* ── Hero ── */}
       <section className="contact__hero">
         <span className="contact__label">Contact Us</span>
         <h1 className="contact__hero-title">We'd love to hear from you</h1>
@@ -29,7 +43,6 @@ function Contact() {
 
       <div className="contact__body">
 
-        {/* ── Info Cards ── */}
         <div className="contact__info-cards">
           {[
             { icon: '📧', title: 'Email Us', desc: 'support@etutor.com', sub: 'We reply within 24 hours' },
@@ -45,10 +58,8 @@ function Contact() {
           ))}
         </div>
 
-        {/* ── Form + FAQ ── */}
         <div className="contact__layout">
 
-          {/* Form */}
           <div className="contact__form-wrap">
             <h2 className="contact__form-title">Send us a Message</h2>
             {submitted ? (
@@ -56,7 +67,10 @@ function Contact() {
                 <span className="contact__success-icon">✅</span>
                 <h3>Message Sent!</h3>
                 <p>Thanks, <strong>{form.name}</strong>! We'll get back to you at <strong>{form.email}</strong> shortly.</p>
-                <button className="contact__reset-btn" onClick={() => { setSubmitted(false); setForm({ name: '', email: '', subject: '', message: '' }) }}>
+                <button className="contact__reset-btn" onClick={() => {
+                  setSubmitted(false)
+                  setForm({ name: '', email: '', subject: '', message: '' })
+                }}>
                   Send Another
                 </button>
               </div>
@@ -87,12 +101,27 @@ function Contact() {
                   <label className="contact__field-label">Message</label>
                   <textarea name="message" className="contact__textarea" placeholder="Tell us how we can help you..." rows={5} value={form.message} onChange={handleChange} required />
                 </div>
-                <button type="submit" className="contact__submit-btn">Send Message →</button>
+
+                {error && (
+                  <div style={{
+                    background: '#fdecea', color: '#e74c3c',
+                    padding: '0.75rem', borderRadius: 8, fontSize: '0.88rem'
+                  }}>
+                    ⚠️ {error}
+                  </div>
+                )}
+
+                <button
+                  type="submit"
+                  className="contact__submit-btn"
+                  disabled={loading}
+                >
+                  {loading ? 'Sending...' : 'Send Message →'}
+                </button>
               </form>
             )}
           </div>
 
-          {/* FAQ */}
           <div className="contact__faq">
             <h2 className="contact__faq-title">Frequently Asked</h2>
             {[

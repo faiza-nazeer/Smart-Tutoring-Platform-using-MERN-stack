@@ -1,34 +1,45 @@
-// StudentDashboard.tsx
-// What a student sees after logging in
 import { Link, useLocation } from 'react-router-dom';
 import './StudentDashboard.css'
-import { useState } from 'react'
+import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
-
-// Dummy data — replace with API calls later
-const STUDENT = { name: 'Ahmed Khan', email: 'ahmed@email.com', avatar: 'AK', joinedDate: 'Jan 2025' }
-
-const UPCOMING_SESSIONS = [
-  { id: 1, tutor: 'Ayesha Khan', subject: 'Mathematics', date: 'Today', time: '5:00 PM', duration: '1 hr', avatar: 'AK', status: 'upcoming' },
-  { id: 2, tutor: 'Zain Ahmed', subject: 'Physics', date: 'Tomorrow', time: '4:00 PM', duration: '1 hr', avatar: 'ZA', status: 'upcoming' },
-  { id: 3, tutor: 'Sara Raza', subject: 'English', date: 'Sat, 30 Apr', time: '3:00 PM', duration: '1 hr', avatar: 'SR', status: 'upcoming' },
-]
-
-const ENROLLED_COURSES = [
-  { id: 1, title: 'Master Mathematics', tutor: 'Ayesha Khan', subject: 'Mathematics', progress: 65, avatar: 'AK' },
-  { id: 2, title: 'Physics for Intermediate', tutor: 'Zain Ahmed', subject: 'Physics', progress: 40, avatar: 'ZA' },
-  { id: 3, title: 'English Grammar Masterclass', tutor: 'Sara Raza', subject: 'English', progress: 80, avatar: 'SR' },
-]
-
-const STATS = [
-  { label: 'Sessions Completed', value: '12', icon: '✅' },
-  { label: 'Hours Learned', value: '18', icon: '⏱️' },
-  { label: 'Courses Enrolled', value: '3', icon: '📚' },
-  { label: 'Avg Rating Given', value: '4.8', icon: '⭐' },
-]
+import { useEffect, useState } from 'react';
 
 function StudentDashboard() {
   const location = useLocation();
+  const { user, logout } = useAuth()
+  const [bookings, setBookings] = useState<any[]>([])
+  const [courses, setCourses] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    Promise.all([
+      fetch('http://localhost:5000/api/bookings').then(r => r.json()),
+      fetch('http://localhost:5000/api/courses').then(r => r.json()),
+    ]).then(([bookingsData, coursesData]) => {
+      const myBookings = bookingsData.filter((b: any) => b.student?._id === user?._id)
+      setBookings(myBookings)
+      setCourses(coursesData)
+      setLoading(false)
+    }).catch(() => setLoading(false))
+  }, [user])
+
+  const STUDENT = {
+    name: user?.name || 'Student',
+    email: user?.email || '',
+    avatar: user?.name?.slice(0, 2).toUpperCase() || 'S',
+  }
+
+  const upcomingSessions = bookings.filter(b =>
+    b.status === 'Pending' || b.status === 'Confirmed'
+  )
+  const completedSessions = bookings.filter(b => b.status === 'Completed')
+
+  const stats = [
+    { label: 'Sessions Completed', value: completedSessions.length, icon: '✅' },
+    { label: 'Total Bookings', value: bookings.length, icon: '📅' },
+    { label: 'Courses Available', value: courses.length, icon: '📚' },
+    { label: 'Tutors Available', value: '6', icon: '🎓' },
+  ]
 
   const navLinks = [
     { to: '/dashboard/student', label: '🏠 Dashboard' },
@@ -36,16 +47,15 @@ function StudentDashboard() {
     { to: '/dashboard/sessions', label: '📅 My Sessions' },
     { to: '/dashboard/find-tutors', label: '🔍 Find Tutors' },
     { to: '/dashboard/profile', label: '👤 My Profile' },
-    { to: '/dashboard/settings', label: '⚙️ Settings' },
   ]
+
+  if (loading) return <div style={{ padding: '2rem' }}>Loading dashboard...</div>
 
   return (
     <div className="sd-page">
       <Navbar />
-
       <div className="sd-body">
 
-        {/* Sidebar */}
         <aside className="sd-sidebar">
           <div className="sd-profile">
             <div className="sd-profile__avatar">{STUDENT.avatar}</div>
@@ -66,24 +76,32 @@ function StudentDashboard() {
             ))}
           </nav>
 
-          <button className="sd-logout-btn">Log Out</button>
+          <button
+            className="sd-logout-btn"
+            onClick={() => { logout(); window.location.href = '/login'; }}
+          >
+            Log Out
+          </button>
         </aside>
-        
-        {/* Main content */}
+
         <main className="sd-main">
 
-          {/* Welcome header */}
           <div className="sd-welcome">
             <div>
-              <h1 className="sd-welcome__heading">Welcome back, {STUDENT.name.split(' ')[0]}! 👋</h1>
-              <p className="sd-welcome__sub">Here's what's happening with your learning today.</p>
+              <h1 className="sd-welcome__heading">
+                Welcome back, {STUDENT.name.split(' ')[0]}! 👋
+              </h1>
+              <p className="sd-welcome__sub">
+                Here's what's happening with your learning today.
+              </p>
             </div>
-            <Link to="/dashboard/find-tutors" className="sd-find-tutor-btn">+ Find a Tutor</Link>
+            <Link to="/dashboard/find-tutors" className="sd-find-tutor-btn">
+              + Find a Tutor
+            </Link>
           </div>
 
-          {/* Stats row */}
           <div className="sd-stats-row">
-            {STATS.map(stat => (
+            {stats.map(stat => (
               <div className="sd-stat-card" key={stat.label}>
                 <span className="sd-stat-card__icon">{stat.icon}</span>
                 <span className="sd-stat-card__value">{stat.value}</span>
@@ -92,7 +110,6 @@ function StudentDashboard() {
             ))}
           </div>
 
-          {/* Two column layout */}
           <div className="sd-cols">
 
             {/* Upcoming sessions */}
@@ -102,47 +119,71 @@ function StudentDashboard() {
                 <Link to="/dashboard/sessions" className="sd-section__link">View all</Link>
               </div>
               <div className="sd-sessions">
-                {UPCOMING_SESSIONS.map(s => (
-                  <div className="sd-session-card" key={s.id}>
-                    <div className="sd-session-card__avatar">{s.avatar}</div>
-                    <div className="sd-session-card__info">
-                      <p className="sd-session-card__tutor">{s.tutor}</p>
-                      <p className="sd-session-card__subject">{s.subject}</p>
-                    </div>
-                    <div className="sd-session-card__time">
-                      <p className="sd-session-card__date">{s.date}</p>
-                      <p className="sd-session-card__clock">{s.time} · {s.duration}</p>
-                    </div>
-                    <button className="sd-session-card__join-btn">Join</button>
+                {upcomingSessions.length === 0 ? (
+                  <div style={{
+                    textAlign: 'center', padding: '2rem', color: 'var(--gray)'
+                  }}>
+                    <p>No upcoming sessions</p>
+                    <Link
+                      to="/dashboard/find-tutors"
+                      style={{ color: 'var(--purple)', fontWeight: 600 }}
+                    >
+                      Book a session →
+                    </Link>
                   </div>
-                ))}
+                ) : (
+                  upcomingSessions.map((s: any) => (
+                    <div className="sd-session-card" key={s._id}>
+                      <div className="sd-session-card__avatar">
+                        {s.tutor?.name?.slice(0, 2).toUpperCase()}
+                      </div>
+                      <div className="sd-session-card__info">
+                        <p className="sd-session-card__tutor">{s.tutor?.name}</p>
+                        <p className="sd-session-card__subject">{s.subject}</p>
+                      </div>
+                      <div className="sd-session-card__time">
+                        <p className="sd-session-card__date">{s.date}</p>
+                        <p className="sd-session-card__clock">
+                          {s.time} · {s.duration}
+                        </p>
+                      </div>
+                      <button
+                        className="sd-session-card__join-btn"
+                        onClick={() => window.open('https://meet.google.com', '_blank')}
+                      >
+                        Join
+                      </button>
+                    </div>
+                  ))
+                )}
               </div>
             </section>
 
-            {/* Enrolled courses */}
+            {/* Available courses */}
             <section className="sd-section">
               <div className="sd-section__header">
-                <h2 className="sd-section__heading">My Courses</h2>
-                <Link to="/dashboard/courses" className="sd-section__link">View all</Link>
+                <h2 className="sd-section__heading">Available Courses</h2>
+                <Link to="/courses" className="sd-section__link">View all</Link>
               </div>
               <div className="sd-courses">
-                {ENROLLED_COURSES.map(c => (
-                  <div className="sd-course-card" key={c.id}>
+                {courses.slice(0, 3).map((c: any) => (
+                  <div className="sd-course-card" key={c._id}>
                     <div className="sd-course-card__left">
-                      <div className="sd-course-card__avatar">{c.avatar}</div>
+                      <div className="sd-course-card__avatar">
+                        {c.tutor?.name?.slice(0, 2).toUpperCase()}
+                      </div>
                       <div>
                         <p className="sd-course-card__title">{c.title}</p>
-                        <p className="sd-course-card__tutor">{c.tutor} · {c.subject}</p>
+                        <p className="sd-course-card__tutor">
+                          {c.tutor?.name} · {c.subject}
+                        </p>
                       </div>
                     </div>
-                    <div className="sd-course-card__progress-wrap">
-                      <div className="sd-progress-bar">
-                        <div
-                          className="sd-progress-bar__fill"
-                          style={{ width: `${c.progress}%` }}
-                        ></div>
-                      </div>
-                      <p className="sd-course-card__progress-text">{c.progress}% complete</p>
+                    <div style={{ textAlign: 'right', fontSize: '0.82rem' }}>
+                      <p style={{ color: 'var(--orange)', fontWeight: 700 }}>
+                        Rs {c.price}/hr
+                      </p>
+                      <p style={{ color: 'var(--gray)' }}>⭐ {c.rating}</p>
                     </div>
                   </div>
                 ))}
