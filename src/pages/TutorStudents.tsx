@@ -1,15 +1,42 @@
+import { useEffect, useState } from "react";
 import "./TutorStudents.css";
-
-const students = [
-  { id: 1, name: "Ahmed Khan", course: "Master Mathematics", progress: 65, sessions: 8, lastSeen: "Today", avatar: "AK", rating: 5 },
-  { id: 2, name: "Fatima Tariq", course: "Advanced Algebra", progress: 40, sessions: 5, lastSeen: "Yesterday", avatar: "FT", rating: 5 },
-  { id: 3, name: "Hassan Ali", course: "Calculus Fundamentals", progress: 80, sessions: 12, lastSeen: "2 days ago", avatar: "HA", rating: 4 },
-  { id: 4, name: "Zara Imran", course: "Master Mathematics", progress: 55, sessions: 6, lastSeen: "3 days ago", avatar: "ZI", rating: 5 },
-  { id: 5, name: "Bilal Shah", course: "Advanced Algebra", progress: 30, sessions: 3, lastSeen: "1 week ago", avatar: "BS", rating: 4 },
-  { id: 6, name: "Nadia Iqbal", course: "Calculus Fundamentals", progress: 90, sessions: 15, lastSeen: "Today", avatar: "NI", rating: 5 },
-];
-
+import { useAuth } from "../context/AuthContext";
 export default function TutorStudents() {
+  const { user } = useAuth();
+  const [students, setStudents] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch('http://localhost:5000/api/bookings')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        const myBookings = data.filter(b => b.tutor?._id === user?._id);
+
+        // Get unique students
+        const studentMap = new Map();
+        myBookings.forEach((b: any) => {
+          if (b.student?._id && !studentMap.has(b.student._id)) {
+            studentMap.set(b.student._id, {
+              _id: b.student._id,
+              name: b.student.name,
+              email: b.student.email,
+              sessions: myBookings.filter(
+                (s: any) => s.student?._id === b.student._id
+              ).length,
+              lastSession: b.date,
+              subject: b.subject,
+              status: b.status,
+            });
+          }
+        });
+
+        setStudents(Array.from(studentMap.values()));
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [user]);
+
+  if (loading) return <div style={{ padding: '2rem' }}>Loading students...</div>;
+
   return (
     <div className="tstu-page">
       <div className="tstu-header">
@@ -18,45 +45,75 @@ export default function TutorStudents() {
           <p>Track all your enrolled students</p>
         </div>
         <div className="tstu-stats-mini">
-          <div><strong>48</strong><span>Total Students</span></div>
-          <div><strong>6</strong><span>Active Now</span></div>
+          <div>
+            <strong>{students.length}</strong>
+            <span>Total Students</span>
+          </div>
+          <div>
+            <strong>
+              {students.filter(s => s.status === 'Confirmed' || s.status === 'Pending').length}
+            </strong>
+            <span>Active</span>
+          </div>
         </div>
       </div>
 
-      <div className="tstu-grid">
-        {students.map(s => (
-          <div className="tstu-card" key={s.id}>
-            <div className="tstu-card__top">
-              <div className="tstu-avatar">{s.avatar}</div>
-              <div className="tstu-card__info">
-                <h3>{s.name}</h3>
-                <p>{s.course}</p>
+      {students.length === 0 ? (
+        <div style={{
+          textAlign: 'center', padding: '3rem',
+          background: 'white', borderRadius: 14, color: 'var(--gray)'
+        }}>
+          <p>No students yet. Share your profile to get bookings!</p>
+        </div>
+      ) : (
+        <div className="tstu-grid">
+          {students.map(s => (
+            <div className="tstu-card" key={s._id}>
+              <div className="tstu-card__top">
+                <div className="tstu-avatar">
+                  {s.name?.slice(0, 2).toUpperCase()}
+                </div>
+                <div className="tstu-card__info">
+                  <h3>{s.name}</h3>
+                  <p>{s.subject}</p>
+                </div>
+                <span className="tstu-last-seen">{s.lastSession}</span>
               </div>
-              <span className="tstu-last-seen">{s.lastSeen}</span>
-            </div>
 
-            <div className="tstu-card__progress">
-              <div className="tstu-progress-label">
-                <span>Progress</span>
-                <span>{s.progress}%</span>
+              <div className="tstu-card__progress">
+                <div className="tstu-progress-label">
+                  <span>Sessions Booked</span>
+                  <span>{s.sessions}</span>
+                </div>
+                <div className="tstu-progress-bar">
+                  <div
+                    className="tstu-progress-fill"
+                    style={{ width: `${Math.min((s.sessions / 10) * 100, 100)}%` }}
+                  />
+                </div>
               </div>
-              <div className="tstu-progress-bar">
-                <div className="tstu-progress-fill" style={{ width: `${s.progress}%` }} />
+
+              <div className="tstu-card__footer">
+                <span>📧 {s.email}</span>
+                <span style={{
+                  padding: '3px 10px', borderRadius: 20,
+                  fontSize: '0.75rem', fontWeight: 600,
+                  background: s.status === 'Confirmed' ? '#e6faf0' : '#fff8e1',
+                  color: s.status === 'Confirmed' ? '#27ae60' : '#f57f17'
+                }}>
+                  {s.status}
+                </span>
+              </div>
+
+              <div className="tstu-card__actions">
+                <button className="tstu-btn-outline">View Profile</button>
+                
               </div>
             </div>
-
-            <div className="tstu-card__footer">
-              <span>📅 {s.sessions} sessions</span>
-              <span>{'⭐'.repeat(s.rating)}</span>
-            </div>
-
-            <div className="tstu-card__actions">
-              <button className="tstu-btn-outline">View Profile</button>
-              <button className="tstu-btn-primary">Message</button>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
+    
     </div>
   );
 }

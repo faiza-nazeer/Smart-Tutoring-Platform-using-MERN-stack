@@ -64,6 +64,7 @@ function App() {
         <Route path="/dashboard/tutor" element={<TutorDashboard />} />
         <Route path="/dashboard/tutor/sessions"  element={<TutorSessions />} />
         <Route path="/dashboard/tutor/courses"   element={<TutorCourses />} />
+        <Route path="/dashboard/tutor/profile" element={<MyProfile />} />
         <Route path="/dashboard/tutor/students"  element={<TutorStudents />} />
         <Route path="/dashboard/tutor/earnings"  element={<TutorEarnings />} />
         {/* <Route path="/dashboard/tutor" element={<TutorDashboard />} /> */}

@@ -1,25 +1,55 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./TutorSessions.css";
-
-const sessions = [
-  { id: 1, student: "Ahmed Khan", subject: "Mathematics", date: "Today", time: "5:00 PM", duration: "1 hr", avatar: "AK", type: "upcoming" },
-  { id: 2, student: "Fatima Tariq", subject: "Mathematics", date: "Today", time: "7:00 PM", duration: "1 hr", avatar: "FT", type: "upcoming" },
-  { id: 3, student: "Hassan Ali", subject: "Mathematics", date: "Tomorrow", time: "3:00 PM", duration: "1 hr", avatar: "HA", type: "upcoming" },
-  { id: 4, student: "Zara Imran", subject: "Mathematics", date: "Sat, 30 Apr", time: "11:00 AM", duration: "1 hr", avatar: "ZI", type: "upcoming" },
-  { id: 5, student: "Ahmed Khan", subject: "Mathematics", date: "Mon, 22 Apr", time: "5:00 PM", duration: "1 hr", avatar: "AK", type: "completed" },
-  { id: 6, student: "Fatima Tariq", subject: "Mathematics", date: "Fri, 19 Apr", time: "7:00 PM", duration: "1 hr", avatar: "FT", type: "completed" },
-  { id: 7, student: "Bilal Shah", subject: "Mathematics", date: "Wed, 17 Apr", time: "4:00 PM", duration: "1 hr", avatar: "BS", type: "cancelled" },
-];
+import { useAuth } from "../context/AuthContext";
 
 const typeBadge: Record<string, { label: string; cls: string }> = {
-  upcoming:  { label: "Upcoming",  cls: "badge-upcoming" },
-  completed: { label: "Completed", cls: "badge-done" },
-  cancelled: { label: "Cancelled", cls: "badge-cancelled" },
+  Confirmed: { label: "Confirmed", cls: "badge-upcoming" },
+  Pending:   { label: "Pending",   cls: "badge-upcoming" },
+  Completed: { label: "Completed", cls: "badge-done" },
+  Cancelled: { label: "Cancelled", cls: "badge-cancelled" },
 };
 
 export default function TutorSessions() {
+  const { user } = useAuth();
+  const [sessions, setSessions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<"upcoming" | "completed" | "cancelled">("upcoming");
-  const filtered = sessions.filter(s => s.type === tab);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/bookings')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        const mySessions = data.filter(b => b.tutor?._id === user?._id);
+        setSessions(mySessions);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [user]);
+
+  const upcoming = sessions.filter(s =>
+    s.status === 'Pending' || s.status === 'Confirmed'
+  );
+  const completed = sessions.filter(s => s.status === 'Completed');
+  const cancelled = sessions.filter(s => s.status === 'Cancelled');
+
+  const getFiltered = () => {
+    if (tab === 'upcoming') return upcoming;
+    if (tab === 'completed') return completed;
+    return cancelled;
+  };
+
+  const handleStatusUpdate = async (id: string, status: string) => {
+    await fetch(`http://localhost:5000/api/bookings/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status }),
+    });
+    setSessions(prev =>
+      prev.map(s => s._id === id ? { ...s, status } : s)
+    );
+  };
+
+  if (loading) return <div style={{ padding: '2rem' }}>Loading sessions...</div>;
 
   return (
     <div className="ts-page">
@@ -29,9 +59,9 @@ export default function TutorSessions() {
           <p>Manage all your tutoring sessions</p>
         </div>
         <div className="ts-stats-mini">
-          <div><strong>4</strong><span>Upcoming</span></div>
-          <div><strong>340</strong><span>Total Done</span></div>
-          <div><strong>18h</strong><span>This Month</span></div>
+          <div><strong>{upcoming.length}</strong><span>Upcoming</span></div>
+          <div><strong>{completed.length}</strong><span>Completed</span></div>
+          <div><strong>{sessions.length}</strong><span>Total</span></div>
         </div>
       </div>
 
@@ -43,30 +73,56 @@ export default function TutorSessions() {
             onClick={() => setTab(t)}
           >
             {t.charAt(0).toUpperCase() + t.slice(1)}
-            <span className="ts-tab-count">{sessions.filter(s => s.type === t).length}</span>
+            <span className="ts-tab-count">
+              {t === 'upcoming' ? upcoming.length :
+               t === 'completed' ? completed.length : cancelled.length}
+            </span>
           </button>
         ))}
       </div>
 
       <div className="ts-list">
-        {filtered.length === 0 ? (
+        {getFiltered().length === 0 ? (
           <div className="ts-empty">No {tab} sessions found.</div>
-        ) : filtered.map(s => (
-          <div className="ts-card" key={s.id}>
-            <div className="ts-avatar">{s.avatar}</div>
-            <div className="ts-card__info">
-              <h4>{s.student}</h4>
-              <p>{s.subject}</p>
+        ) : (
+          getFiltered().map(s => (
+            <div className="ts-card" key={s._id}>
+              <div className="ts-avatar">
+                {s.student?.name?.slice(0, 2).toUpperCase()}
+              </div>
+              <div className="ts-card__info">
+                <h4>{s.student?.name}</h4>
+                <p>{s.subject}</p>
+              </div>
+              <div className="ts-card__time">
+                <span className="ts-date">{s.date}</span>
+                <span>{s.time} · {s.duration}</span>
+              </div>
+              <span className={`ts-badge ${typeBadge[s.status]?.cls || 'badge-upcoming'}`}>
+                {typeBadge[s.status]?.label || s.status}
+              </span>
+              {tab === 'upcoming' && (
+                <>
+                  <button
+                    className="ts-start-btn"
+                    onClick={() => window.open('https://meet.google.com', '_blank')}
+                  >
+                    Start
+                  </button>
+                  <button
+                    className="ts-notes-btn"
+                    onClick={() => handleStatusUpdate(s._id, 'Completed')}
+                  >
+                    ✓ Complete
+                  </button>
+                </>
+              )}
+              {tab === 'completed' && (
+                <button className="ts-notes-btn">📝 Notes</button>
+              )}
             </div>
-            <div className="ts-card__time">
-              <span className="ts-date">{s.date}</span>
-              <span>{s.time} · {s.duration}</span>
-            </div>
-            <span className={`ts-badge ${typeBadge[s.type].cls}`}>{typeBadge[s.type].label}</span>
-            {s.type === "upcoming" && <button className="ts-start-btn">Start</button>}
-            {s.type === "completed" && <button className="ts-notes-btn">📝 Notes</button>}
-          </div>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

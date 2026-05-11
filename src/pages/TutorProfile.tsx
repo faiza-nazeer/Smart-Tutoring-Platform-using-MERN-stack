@@ -8,7 +8,6 @@ function TutorProfile() {
   const [tutor, setTutor] = useState<any>(null)
   const [courses, setCourses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
-
   useEffect(() => {
     if (!id) return
     Promise.all([
@@ -168,12 +167,10 @@ function TutorProfile() {
                 <span className="tutor-profile__rate-label">/ hour</span>
               </div>
 
-              <Link to="/booking" className="tutor-profile__book-btn">
+              <Link to={`/booking?tutorId=${tutor._id}&tutorName=${encodeURIComponent(tutor.name)}&subject=${encodeURIComponent(tutor.subject)}&price=${tutor.price}`} className="tutor-profile__book-btn">
                 Book a Session
               </Link>
-              <Link to="/contact" className="tutor-profile__msg-btn">
-                Send Message
-              </Link>
+              
 
               <div className="tutor-profile__card-stats">
                 <div className="tutor-profile__card-stat">
@@ -223,8 +220,9 @@ function TutorProfile() {
 
         </div>
       </div>
+      
       <footer className="footer">
-        <p>© 2024 eTutor. All rights reserved.</p>
+        <p>2024 eTutor. All rights reserved.</p>
       </footer>
     </div>
   )

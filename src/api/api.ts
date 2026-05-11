@@ -108,3 +108,12 @@ export const forgotPassword = async (email: string, newPassword: string): Promis
   });
   return res.json();
 };
+export const getMessages = async (userId1: string, userId2: string): Promise<any[]> => {
+  const res = await fetch(`http://localhost:5000/api/messages/${userId1}/${userId2}`);
+  return res.json();
+};
+
+export const getConversations = async (userId: string): Promise<any[]> => {
+  const res = await fetch(`http://localhost:5000/api/messages/conversations/${userId}`);
+  return res.json();
+};

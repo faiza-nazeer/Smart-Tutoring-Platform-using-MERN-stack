@@ -1,23 +1,42 @@
+import { useEffect, useState } from "react";
 import "./TutorEarnings.css";
-
-const monthly = [
-  { month: "Jan", amount: 55000, sessions: 32 },
-  { month: "Feb", amount: 62000, sessions: 38 },
-  { month: "Mar", amount: 58000, sessions: 35 },
-  { month: "Apr", amount: 72000, sessions: 44 },
-];
-
-const transactions = [
-  { id: 1, student: "Ahmed Khan", course: "Master Mathematics", date: "Today", amount: 1500, avatar: "AK" },
-  { id: 2, student: "Fatima Tariq", course: "Advanced Algebra", date: "Yesterday", amount: 1500, avatar: "FT" },
-  { id: 3, student: "Hassan Ali", course: "Calculus Fundamentals", date: "Mon, 22 Apr", amount: 1500, avatar: "HA" },
-  { id: 4, student: "Zara Imran", course: "Master Mathematics", date: "Sat, 20 Apr", amount: 1500, avatar: "ZI" },
-  { id: 5, student: "Nadia Iqbal", course: "Calculus Fundamentals", date: "Fri, 19 Apr", amount: 1500, avatar: "NI" },
-];
-
-const maxAmount = Math.max(...monthly.map(m => m.amount));
+import { useAuth } from "../context/AuthContext";
 
 export default function TutorEarnings() {
+  const { user } = useAuth();
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/bookings')
+      .then(res => res.json())
+      .then((data: any[]) => {
+        const myBookings = data.filter(b => b.tutor?._id === user?._id);
+        setBookings(myBookings);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, [user]);
+
+  const totalEarnings = bookings.reduce((sum, b) => sum + (b.amount || 0), 0);
+  const completedEarnings = bookings
+    .filter(b => b.status === 'Completed')
+    .reduce((sum, b) => sum + (b.amount || 0), 0);
+  const pendingEarnings = bookings
+    .filter(b => b.status === 'Pending' || b.status === 'Confirmed')
+    .reduce((sum, b) => sum + (b.amount || 0), 0);
+
+  const stats = [
+    { icon: '💰', value: `Rs ${totalEarnings.toLocaleString()}`, label: 'Total Earnings', highlight: true },
+    { icon: '✅', value: `Rs ${completedEarnings.toLocaleString()}`, label: 'Completed' },
+    { icon: '⏳', value: `Rs ${pendingEarnings.toLocaleString()}`, label: 'Pending' },
+    { icon: '📅', value: bookings.length, label: 'Total Sessions' },
+  ];
+
+  const recentTransactions = [...bookings].reverse().slice(0, 5);
+
+  if (loading) return <div style={{ padding: '2rem' }}>Loading earnings...</div>;
+
   return (
     <div className="te-page">
       <div className="te-header">
@@ -29,41 +48,51 @@ export default function TutorEarnings() {
       </div>
 
       <div className="te-stats">
-        <div className="te-stat-card te-stat-card--highlight">
-          <span className="te-stat-icon">💰</span>
-          <span className="te-stat-value">Rs 72,000</span>
-          <span className="te-stat-label">This Month</span>
-        </div>
-        <div className="te-stat-card">
-          <span className="te-stat-icon">📈</span>
-          <span className="te-stat-value">Rs 2,47,000</span>
-          <span className="te-stat-label">Total Earned</span>
-        </div>
-        <div className="te-stat-card">
-          <span className="te-stat-icon">⏳</span>
-          <span className="te-stat-value">Rs 12,000</span>
-          <span className="te-stat-label">Pending</span>
-        </div>
-        <div className="te-stat-card">
-          <span className="te-stat-icon">📅</span>
-          <span className="te-stat-value">44</span>
-          <span className="te-stat-label">Sessions This Month</span>
-        </div>
+        {stats.map(s => (
+          <div
+            key={s.label}
+            className={`te-stat-card ${s.highlight ? 'te-stat-card--highlight' : ''}`}
+          >
+            <span className="te-stat-icon">{s.icon}</span>
+            <span className="te-stat-value">{s.value}</span>
+            <span className="te-stat-label">{s.label}</span>
+          </div>
+        ))}
       </div>
 
       <div className="te-cols">
-        {/* Bar Chart */}
+
+        {/* Booking Status Chart */}
         <section className="te-section">
-          <h2>Monthly Overview</h2>
-          <div className="te-chart">
-            {monthly.map(m => (
-              <div className="te-bar-wrap" key={m.month}>
-                <div className="te-bar-amount">Rs {(m.amount / 1000).toFixed(0)}k</div>
-                <div className="te-bar-track">
-                  <div className="te-bar-fill" style={{ height: `${(m.amount / maxAmount) * 100}%` }} />
+          <h2>Booking Overview</h2>
+          <div style={{ padding: '0.5rem 0' }}>
+            {[
+              { label: 'Completed', count: bookings.filter(b => b.status === 'Completed').length, color: '#27ae60' },
+              { label: 'Confirmed', count: bookings.filter(b => b.status === 'Confirmed').length, color: 'var(--purple)' },
+              { label: 'Pending', count: bookings.filter(b => b.status === 'Pending').length, color: 'var(--orange)' },
+              { label: 'Cancelled', count: bookings.filter(b => b.status === 'Cancelled').length, color: '#e74c3c' },
+            ].map(item => (
+              <div key={item.label} style={{ marginBottom: '1rem' }}>
+                <div style={{
+                  display: 'flex', justifyContent: 'space-between',
+                  fontSize: '0.85rem', marginBottom: '0.35rem'
+                }}>
+                  <span>{item.label}</span>
+                  <span style={{ fontWeight: 600 }}>{item.count}</span>
                 </div>
-                <div className="te-bar-month">{m.month}</div>
-                <div className="te-bar-sessions">{m.sessions} sessions</div>
+                <div style={{
+                  height: 8, background: '#ebebf5',
+                  borderRadius: 10, overflow: 'hidden'
+                }}>
+                  <div style={{
+                    height: '100%',
+                    width: bookings.length
+                      ? `${(item.count / bookings.length) * 100}%`
+                      : '0%',
+                    background: item.color,
+                    borderRadius: 10
+                  }} />
+                </div>
               </div>
             ))}
           </div>
@@ -73,18 +102,36 @@ export default function TutorEarnings() {
         <section className="te-section">
           <h2>Recent Transactions</h2>
           <div className="te-transactions">
-            {transactions.map(t => (
-              <div className="te-transaction" key={t.id}>
-                <div className="te-t-avatar">{t.avatar}</div>
-                <div className="te-t-info">
-                  <p className="te-t-name">{t.student}</p>
-                  <p className="te-t-course">{t.course} · {t.date}</p>
+            {recentTransactions.length === 0 ? (
+              <p style={{ color: 'var(--gray)', textAlign: 'center', padding: '2rem' }}>
+                No transactions yet
+              </p>
+            ) : (
+              recentTransactions.map((t: any) => (
+                <div className="te-transaction" key={t._id}>
+                  <div className="te-t-avatar">
+                    {t.student?.name?.slice(0, 2).toUpperCase()}
+                  </div>
+                  <div className="te-t-info">
+                    <p className="te-t-name">{t.student?.name}</p>
+                    <p className="te-t-course">{t.subject} · {t.date}</p>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <span className="te-t-amount">+Rs {t.amount?.toLocaleString()}</span>
+                    <p style={{
+                      fontSize: '0.75rem', marginTop: '2px',
+                      color: t.status === 'Completed' ? '#27ae60' :
+                             t.status === 'Cancelled' ? '#e74c3c' : 'var(--orange)'
+                    }}>
+                      {t.status}
+                    </p>
+                  </div>
                 </div>
-                <span className="te-t-amount">+Rs {t.amount.toLocaleString()}</span>
-              </div>
-            ))}
+              ))
+            )}
           </div>
         </section>
+
       </div>
     </div>
   );
