@@ -31,7 +31,6 @@ import AdminTutors from "./pages/AdminTutors";
 import AdminCourses from "./pages/AdminCourses";
 import AdminBookings from "./pages/AdminBookings";
 import AdminEarnings from "./pages/AdminEarnings";
-import AdminSettings from "./pages/AdminSettings";
 import Reviews from './pages/Reviews';
 import ForgotPassword from './pages/ForgotPassword'
 
@@ -74,7 +73,6 @@ function App() {
         <Route path="/dashboard/admin/courses" element={<AdminCourses />} />
         <Route path="/dashboard/admin/bookings" element={<AdminBookings />} />
         <Route path="/dashboard/admin/earnings" element={<AdminEarnings />} />
-        <Route path="/dashboard/admin/settings" element={<AdminSettings />} />
         <Route path="/tutor/:id/reviews" element={<Reviews />} />
         <Route path="/dashboard/tutor/reviews" element={<Reviews />} />
 

@@ -26,7 +26,7 @@ export default function AdminDashboard() {
       });
   }, []);
 
-  const totalStudents = users.filter(u => u.role === "student").length;
+  // const totalStudents = users.filter(u => u.role === "student").length;
   const totalTutors = users.filter(u => u.role === "tutor").length;
   const recentUsers = [...users].reverse().slice(0, 5);
   const recentBookings = [...bookings].reverse().slice(0, 4);
@@ -138,7 +138,6 @@ export default function AdminDashboard() {
               { to: "/dashboard/admin/users", icon: "👥", label: "Manage Users" },
               { to: "/dashboard/admin/courses", icon: "📚", label: "Review Courses" },
               { to: "/dashboard/admin/bookings", icon: "📅", label: "View Bookings" },
-              { to: "/dashboard/admin/settings", icon: "⚙️", label: "Settings" },
             ].map((q) => (
               <Link key={q.to} to={q.to} className="quick-link-card">
                 <span>{q.icon}</span>

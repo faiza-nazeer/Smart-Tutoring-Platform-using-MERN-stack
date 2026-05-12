@@ -1,13 +1,23 @@
-// Hero.tsx
-// No CSS import here — styles come from Home.css (imported in Home.tsx)
+import { useEffect, useState } from 'react'
 
 function Hero() {
+  const [courseCount, setCourseCount] = useState(0)
+
+  useEffect(() => {
+    fetch('http://localhost:5000/api/courses')
+      .then(res => res.json())
+      .then(data => setCourseCount(data.length))
+      .catch(() => {})
+  }, [])
+
   return (
     <section className="hero" id="home">
       <div className="hero__content">
         <div className="hero__badge">
           <span className="hero__badge-new">New</span>
-          <span className="hero__badge-text">Get 30% off in any course in April 2025</span>
+          <span className="hero__badge-text">
+            Browse {courseCount}+ courses from verified tutors
+          </span>
         </div>
 
         <h1 className="hero__heading">
@@ -40,7 +50,12 @@ function Hero() {
               placeholder="Search for a course or subject..."
             />
           </div>
-          <button className="hero__search-btn">Search</button>
+          <button
+            className="hero__search-btn"
+            onClick={() => window.location.href = '/courses'}
+          >
+            Search
+          </button>
         </div>
       </div>
 
@@ -50,16 +65,10 @@ function Hero() {
         <div className="hero__floating-icon hero__floating-icon--tl">🎯</div>
         <div className="hero__floating-icon hero__floating-icon--tr">🎓</div>
         <div className="hero__floating-icon hero__floating-icon--br">📚</div>
-
-        {/* Replace with your actual image */}
         <div className="hero__image-placeholder">
           <span>📸 Add hero image here</span>
           <code>src/assets/tutor-hero.png</code>
         </div>
-
-        {/* Uncomment when you have the image:
-        <img src="/assets/tutor-hero.png" alt="Tutor and student" className="hero__image" />
-        */}
       </div>
     </section>
   )

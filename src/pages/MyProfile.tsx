@@ -3,7 +3,7 @@ import "./MyProfile.css";
 import { useAuth } from "../context/AuthContext";
 
 export default function MyProfile() {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -31,6 +31,7 @@ export default function MyProfile() {
       });
       setSuccess(true);
       setEditing(false);
+      updateUser(form);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error(err);
@@ -52,7 +53,7 @@ export default function MyProfile() {
             else setEditing(true);
           }}
         >
-          {saving ? 'Saving...' : editing ? "✓ Save Changes" : "✎ Edit Profile"}
+          {saving ? 'Saving...' : editing ? "Save Changes" : "Edit Profile"}
         </button>
       </div>
 
