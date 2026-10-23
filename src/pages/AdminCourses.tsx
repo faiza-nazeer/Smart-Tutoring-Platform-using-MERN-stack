@@ -1,3 +1,4 @@
+import { apiFetch } from '../api/api'
 import { useState, useEffect } from "react";
 import AdminSidebar from "../components/AdminSidebar";
 import "./AdminLayout.css";
@@ -23,12 +24,12 @@ export default function AdminCourses() {
 
   const handleDelete = async (id: string) => {
     if (!window.confirm("Delete this course permanently?")) return;
-    await fetch(`http://localhost:5000/api/courses/${id}`, { method: "DELETE" });
+    await apiFetch(`/courses/${id}`, { method: "DELETE" });
     setCourses(prev => prev.filter(c => c._id !== id));
   };
 
   const handleStatusChange = async (id: string, status: string) => {
-    const res = await fetch(`http://localhost:5000/api/courses/${id}`, {
+    const res = await apiFetch(`/courses/${id}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ status }),

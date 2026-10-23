@@ -1,3 +1,4 @@
+import { apiFetch } from '../api/api'
 import './TutorProfile.css'
 import Navbar from '../components/Navbar'
 import { Link, useParams } from 'react-router-dom'
@@ -8,11 +9,12 @@ function TutorProfile() {
   const [tutor, setTutor] = useState<any>(null)
   const [courses, setCourses] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+
   useEffect(() => {
     if (!id) return
     Promise.all([
-      fetch(`http://localhost:5000/api/users/${id}`).then(r => r.json()),
-      fetch(`http://localhost:5000/api/courses`).then(r => r.json()),
+      apiFetch(`/users/${id}`).then(r => r.json()),
+      apiFetch(`/courses`).then(r => r.json()),
     ]).then(([tutorData, coursesData]) => {
       setTutor(tutorData)
       const tutorCourses = coursesData.filter((c: any) => c.tutor?._id === id)
@@ -167,10 +169,12 @@ function TutorProfile() {
                 <span className="tutor-profile__rate-label">/ hour</span>
               </div>
 
-              <Link to={`/booking?tutorId=${tutor._id}&tutorName=${encodeURIComponent(tutor.name)}&subject=${encodeURIComponent(tutor.subject)}&price=${tutor.price}`} className="tutor-profile__book-btn">
+              <Link to={`/booking/${tutor._id}`} className="tutor-profile__book-btn">
                 Book a Session
               </Link>
-              
+              <Link to="/contact" className="tutor-profile__msg-btn">
+                Send Message
+              </Link>
 
               <div className="tutor-profile__card-stats">
                 <div className="tutor-profile__card-stat">
@@ -220,9 +224,8 @@ function TutorProfile() {
 
         </div>
       </div>
-      
       <footer className="footer">
-        <p>2024 eTutor. All rights reserved.</p>
+        <p>© 2024 eTutor. All rights reserved.</p>
       </footer>
     </div>
   )

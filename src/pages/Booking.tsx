@@ -1,61 +1,52 @@
 import './Booking.css'
 import Navbar from '../components/Navbar'
-import { useState } from 'react'
-import { useSearchParams } from 'react-router-dom'
-import { createBooking } from '../api/api'
-import { useAuth } from '../context/AuthContext'
-
+import { useEffect, useState } from 'react'
+import { createBooking, getUser } from '../api/api'
+import { Link, useParams } from 'react-router-dom'
 const timeSlots = ['9:00 AM', '10:00 AM', '11:00 AM', '1:00 PM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM']
 
 function Booking() {
-  const [searchParams] = useSearchParams()
-  const { user } = useAuth()
-
-  // Get tutor info from URL params
-  const tutorId = searchParams.get('tutorId') || ''
-  const tutorName = searchParams.get('tutorName') || 'Select a Tutor'
-  const tutorSubject = searchParams.get('subject') || ''
-  const tutorPrice = searchParams.get('price') || '0'
-
-  const subjects = tutorSubject
-    ? [tutorSubject]
-    : ['Algebra', 'Calculus', 'Statistics', 'Geometry', 'Trigonometry']
-
   const [selectedDate, setSelectedDate] = useState('')
   const [selectedTime, setSelectedTime] = useState('')
-  const [selectedSubject, setSelectedSubject] = useState(tutorSubject || '')
+  const [selectedSubject, setSelectedSubject] = useState('')
   const [sessionType, setSessionType] = useState<'online' | 'in-person'>('online')
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [loading, setLoading] = useState(false)
+  const { tutorId } = useParams()
+  const [tutor, setTutor] = useState<any>(null)
+  const [tutorLoading, setTutorLoading] = useState(!!tutorId)
   const [error, setError] = useState('')
 
+  useEffect(() => {
+    if (!tutorId) return
+    getUser(tutorId)
+      .then((data: any) => setTutor(data.message ? null : data))
+      .catch(() => setTutor(null))
+      .finally(() => setTutorLoading(false))
+  }, [tutorId])
+
+  const subjects = tutor ? [tutor.subject, 'Exam Preparation', 'Homework Help'].filter(Boolean) : []
+  const price = tutor?.price || 0
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!selectedDate || !selectedTime || !selectedSubject) return
-    if (!user) {
-      setError('Please log in to book a session')
-      return
-    }
-    if (!tutorId) {
-      setError('Please select a tutor first')
+    if (!selectedDate || !selectedTime || !selectedSubject) {
+      setError('Please choose a subject, a date and a time.')
       return
     }
 
-    setLoading(true)
     setError('')
+    setLoading(true)
     try {
       const data = await createBooking({
-        student: user._id,
         tutor: tutorId,
         subject: selectedSubject,
         date: selectedDate,
         time: selectedTime,
         sessionType: sessionType,
         duration: '1 hr',
-        amount: parseInt(tutorPrice),
+        amount: price,
         notes: notes,
-        status: 'Pending'
       })
       if (data.message) {
         setError(data.message)
@@ -63,9 +54,27 @@ function Booking() {
         setSubmitted(true)
       }
     } catch (err) {
-      setError('Something went wrong. Please try again.')
+      console.error(err)
+      setError('Could not reach the server. Please try again.')
     }
     setLoading(false)
+  }
+
+  if (tutorLoading) return <div style={{ padding: '2rem' }}>Loading...</div>
+
+  if (!tutorId || !tutor) {
+    return (
+      <div>
+        <Navbar />
+        <div className="booking" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+          <h2>Choose a tutor first</h2>
+          <p>Pick a tutor to see their availability and book a session.</p>
+          <Link to="/dashboard/find-tutors" className="booking__submit-btn" style={{ display: 'inline-block', marginTop: '1rem', textDecoration: 'none' }}>
+            Find Tutors
+          </Link>
+        </div>
+      </div>
+    )
   }
 
   if (submitted) {
@@ -75,29 +84,15 @@ function Booking() {
         <div className="booking">
           <div className="booking__success">
             <div className="booking__success-icon">🎉</div>
-            <h2 className="booking__success-title">Booking Confirmed!</h2>
+            <h2 className="booking__success-title">Booking Requested!</h2>
             <p className="booking__success-text">
-              Your session with <strong>{tutorName}</strong> has been booked for{' '}
+              Your session with <strong>{tutor.name}</strong> has been requested for{' '}
               <strong>{selectedDate}</strong> at <strong>{selectedTime}</strong>.
             </p>
-            <p className="booking__success-sub">
-              You can view your booking in My Sessions.
-            </p>
-           <div style={{ display: 'flex', gap: '1rem', justifyContent: 'center' }}>
-              <button
-                className="booking__back-btn"
-                onClick={() => setSubmitted(false)}
-              >
-                Book Another Session
-              </button>
-              <button
-                className="booking__back-btn"
-                style={{ background: 'var(--orange)', border: 'none', cursor: 'pointer' }}
-                onClick={() => window.location.href = '/dashboard/sessions'}
-              >
-                View My Sessions
-              </button>
-            </div>
+            <p className="booking__success-sub">The tutor will confirm your session. Track it under My Sessions.</p>
+            <button className="booking__back-btn" onClick={() => setSubmitted(false)}>
+              Book Another Session
+            </button>
           </div>
         </div>
         <footer className="footer">
@@ -113,9 +108,7 @@ function Booking() {
       <div className="booking">
         <div className="booking__header">
           <h1 className="booking__title">Book a Session</h1>
-          <p className="booking__subtitle">
-            Schedule a 1-on-1 session with <strong>{tutorName}</strong>
-          </p>
+          <p className="booking__subtitle">Schedule a 1-on-1 session with {tutor.name}</p>
         </div>
 
         <div className="booking__layout">
@@ -186,9 +179,7 @@ function Booking() {
             </div>
 
             <div className="booking__field">
-              <label className="booking__label" htmlFor="notes">
-                Additional Notes (optional)
-              </label>
+              <label className="booking__label" htmlFor="notes">Additional Notes (optional)</label>
               <textarea
                 id="notes"
                 className="booking__textarea"
@@ -199,47 +190,19 @@ function Booking() {
               />
             </div>
 
-            {!user && (
-              <div style={{
-                background: '#fff8e1', color: '#f57f17',
-                padding: '0.75rem', borderRadius: 8,
-                fontSize: '0.88rem', fontWeight: 500
-              }}>
-                ⚠️ Please <a href="/login" style={{ color: 'var(--purple)', fontWeight: 700 }}>log in</a> to book a session
-              </div>
-            )}
-
-            {error && (
-              <div style={{
-                background: '#fdecea', color: '#e74c3c',
-                padding: '0.75rem', borderRadius: 8,
-                fontSize: '0.88rem'
-              }}>
-                ⚠️ {error}
-              </div>
-            )}
-
-            <button
-              type="submit"
-              className="booking__submit-btn"
-              disabled={loading || !user}
-            >
+            {error && <p style={{ color: '#d32f2f', margin: '0 0 0.75rem' }}>{error}</p>}
+            <button type="submit" className="booking__submit-btn" disabled={loading}>
               {loading ? 'Booking...' : 'Confirm Booking'}
             </button>
           </form>
 
-          {/* Summary Card */}
           <div className="booking__summary">
             <h3 className="booking__summary-title">Booking Summary</h3>
             <div className="booking__summary-tutor">
-              <div className="booking__summary-avatar">
-                <span style={{ fontSize: '1.5rem' }}>
-                  {tutorName.slice(0, 2).toUpperCase()}
-                </span>
-              </div>
+              <div className="booking__summary-avatar">👩‍🏫</div>
               <div>
-                <p className="booking__summary-name">{tutorName}</p>
-                <p className="booking__summary-role">{tutorSubject} Tutor</p>
+                <p className="booking__summary-name">{tutor.name}</p>
+                <p className="booking__summary-role">{tutor.subject} Tutor</p>
               </div>
             </div>
             <div className="booking__summary-details">
@@ -249,9 +212,7 @@ function Booking() {
               </div>
               <div className="booking__summary-row">
                 <span className="booking__summary-key">Type</span>
-                <span className="booking__summary-val" style={{ textTransform: 'capitalize' }}>
-                  {sessionType}
-                </span>
+                <span className="booking__summary-val" style={{ textTransform: 'capitalize' }}>{sessionType}</span>
               </div>
               <div className="booking__summary-row">
                 <span className="booking__summary-key">Date</span>
@@ -263,7 +224,7 @@ function Booking() {
               </div>
               <div className="booking__summary-row booking__summary-row--total">
                 <span className="booking__summary-key">Total</span>
-                <span className="booking__summary-total">Rs {tutorPrice}</span>
+                <span className="booking__summary-total">Rs {price.toLocaleString()}</span>
               </div>
             </div>
           </div>

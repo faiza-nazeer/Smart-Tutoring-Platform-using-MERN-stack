@@ -116,7 +116,7 @@ function CourseDetail() {
               </div>
             </div>
 
-            <a href="/booking" className="cd-booking-card__btn">
+            <a href={course.tutor?._id ? `/booking/${course.tutor._id}` : '/dashboard/find-tutors'} className="cd-booking-card__btn">
               Book a Session
             </a>
             <button className="cd-booking-card__msg-btn">

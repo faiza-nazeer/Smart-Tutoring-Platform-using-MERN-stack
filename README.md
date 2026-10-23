@@ -1,73 +1,91 @@
-# React + TypeScript + Vite
+# eTutor: Smart Tutoring Platform (MERN)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack tutoring marketplace where students find tutors and book sessions, tutors manage their courses and sessions, and admins manage the platform.
 
-Currently, two official plugins are available:
+**Live demo:** _add your Vercel link here_  
+**API:** _add your Render link here_ (`/api/health` returns `{"status":"ok"}`)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+> The free-tier backend sleeps when idle, so the first request after a quiet period can take up to about a minute.
 
-## React Compiler
+## Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Students:** browse tutors and courses, book sessions, view session history, edit profile
+- **Tutors:** dashboard, manage own courses, confirm or complete sessions, view reviews
+- **Admins:** manage users, tutors, courses and bookings; earnings charts; contact inbox
+- **Auth:** JWT login/signup, bcrypt password hashing, role-based access on both API and UI routes
 
-## Expanding the ESLint configuration
+## Tech stack
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Layer | Tech |
+|---|---|
+| Frontend | React 19, TypeScript, Vite, React Router, Recharts |
+| Backend | Node.js, Express 5, Mongoose |
+| Database | MongoDB Atlas |
+| Security | JWT, bcryptjs, helmet, CORS allow-list, login rate limiting |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## Demo accounts
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+After running `npm run seed` (see below), all use the password `Demo@12345`:
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Role | Email |
+|---|---|
+| Admin | admin@etutor.demo |
+| Student | student@etutor.demo |
+| Tutor | ayesha@etutor.demo |
+
+## Run locally
+
+```bash
+# 1. Backend
+cd backend
+cp .env.example .env        # fill in MONGO_URI and a long random JWT_SECRET
+npm install
+npm run seed                # optional: creates demo accounts and sample data
+npm run dev                 # http://localhost:5000
+
+# 2. Frontend (new terminal, project root)
+npm install
+npm run dev                 # http://localhost:5173
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Environment variables
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+**Backend (`backend/.env`)**
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| Name | Purpose |
+|---|---|
+| `MONGO_URI` | MongoDB Atlas connection string |
+| `JWT_SECRET` | Long random string used to sign tokens |
+| `CLIENT_URL` | Frontend origin(s) allowed by CORS, comma-separated |
+| `PORT` | Optional; hosts like Render set this automatically |
+
+**Frontend (set in Vercel/Netlify)**
+
+| Name | Purpose |
+|---|---|
+| `VITE_API_URL` | Backend API base URL, e.g. `https://your-api.onrender.com/api` |
+
+## Deploying
+
+1. **MongoDB Atlas:** Network Access → allow `0.0.0.0/0`; create a database user.
+2. **Backend → Render** (Web Service): root directory `backend`, build `npm install`, start `npm start`; set `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`.
+3. **Frontend → Vercel:** build `npm run build`, output `dist`; set `VITE_API_URL`. `vercel.json` handles client-side routing.
+4. Set `CLIENT_URL` on Render to the Vercel URL, then redeploy the backend.
+5. Run `npm run seed` once (locally, pointed at the Atlas database) to create demo accounts.
+
+## API overview
+
+| Area | Access |
+|---|---|
+| `POST /api/auth/register`, `/login` | Public (rate limited). Signup can only create student or tutor accounts. |
+| `GET /api/courses`, `/reviews` | Public |
+| `GET /api/users` | Public, but emails and phone numbers are hidden unless you're an admin or the user themself |
+| `/api/bookings` | Logged in; users only see their own bookings, admins see all |
+| `POST/PUT/DELETE /api/courses` | Tutor (own courses) or admin |
+| `/api/users` writes, `GET /api/contact` | Admin (users can edit their own profile) |
+
+## Known limitations
+
+- Password reset by email is not implemented (the endpoint is disabled by default because an email-only reset would let anyone take over an account).
+- Payments are not integrated; session prices are displayed only.
+- The student "My Courses" page currently shows sample data.

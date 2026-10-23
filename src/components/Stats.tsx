@@ -1,3 +1,4 @@
+import { apiFetch } from '../api/api'
 import { useEffect, useState } from 'react'
 
 function Stats() {
@@ -6,7 +7,7 @@ function Stats() {
   const [avgRating, setAvgRating] = useState(0)
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/users')
+    apiFetch('/users')
       .then(res => res.json())
       .then((data: any[]) => {
         const tutors = data.filter(u => u.role === 'tutor')

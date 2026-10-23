@@ -1,3 +1,4 @@
+import { apiFetch } from '../api/api'
 import './Login.css'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
@@ -19,7 +20,7 @@ function Login() {
 
 
     useEffect(() => {
-    fetch('http://localhost:5000/api/users')
+    apiFetch('/users')
       .then(res => res.json())
       .then((data: any[]) => {
 

@@ -1,5 +1,6 @@
+import { apiFetch } from '../api/api'
 import { Link, useLocation } from 'react-router-dom';
-import './StudentDashboard.css'
+import './Studentdashboard.css'
 import { useAuth } from '../context/AuthContext'
 import Navbar from '../components/Navbar'
 import { useEffect, useState } from 'react';
@@ -13,8 +14,8 @@ function StudentDashboard() {
 
   useEffect(() => {
     Promise.all([
-      fetch('http://localhost:5000/api/bookings').then(r => r.json()),
-      fetch('http://localhost:5000/api/courses').then(r => r.json()),
+      apiFetch('/bookings').then(r => r.json()),
+      apiFetch('/courses').then(r => r.json()),
     ]).then(([bookingsData, coursesData]) => {
       const myBookings = bookingsData.filter((b: any) => b.student?._id === user?._id)
       setBookings(myBookings)

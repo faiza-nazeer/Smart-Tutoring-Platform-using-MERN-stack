@@ -1,64 +1,70 @@
 const express = require('express');
 const router = express.Router();
 const Course = require('../models/Course');
+const { auth, requireRole } = require('../middleware/auth');
 
-// GET all courses
+const FIELDS = ['title', 'subject', 'level', 'price', 'description', 'status'];
+const pick = (obj, keys) =>
+  Object.fromEntries(keys.filter((k) => obj[k] !== undefined).map((k) => [k, obj[k]]));
+
+// GET all courses (public)
 router.get('/', async (req, res) => {
   try {
-    const courses = await Course.find().populate('tutor', 'name email');
-    res.json(courses);
+    res.json(await Course.find().populate('tutor', 'name email'));
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: 'Could not load courses' });
   }
 });
 
-// GET single course
+// GET single course (public)
 router.get('/:id', async (req, res) => {
   try {
     const course = await Course.findById(req.params.id).populate('tutor', 'name email');
     if (!course) return res.status(404).json({ message: 'Course not found' });
     res.json(course);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid course id' });
   }
 });
 
-// POST create course
-router.post('/', async (req, res) => {
+// POST create course (tutor creates their own; admin may assign any tutor)
+router.post('/', auth, requireRole('tutor', 'admin'), async (req, res) => {
   try {
-    const course = new Course(req.body);
-    const saved = await course.save();
+    const tutor = req.user.role === 'admin' ? (req.body.tutor || req.user.id) : req.user.id;
+    const saved = await new Course({ ...pick(req.body, FIELDS), tutor }).save();
     res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
-// POST bulk create courses
-router.post('/bulk', async (req, res) => {
+
+// PUT update course (owner tutor or admin)
+router.put('/:id', auth, requireRole('tutor', 'admin'), async (req, res) => {
   try {
-    const courses = await Course.insertMany(req.body);
-    res.status(201).json(courses);
-  } catch (err) {
-    res.status(400).json({ message: err.message });
-  }
-});
-// PUT update course
-router.put('/:id', async (req, res) => {
-  try {
-    const updated = await Course.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    res.json(updated);
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    if (req.user.role !== 'admin' && String(course.tutor) !== req.user.id) {
+      return res.status(403).json({ message: 'Not your course' });
+    }
+    Object.assign(course, pick(req.body, FIELDS));
+    res.json(await course.save());
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// DELETE course
-router.delete('/:id', async (req, res) => {
+// DELETE course (owner tutor or admin)
+router.delete('/:id', auth, requireRole('tutor', 'admin'), async (req, res) => {
   try {
-    await Course.findByIdAndDelete(req.params.id);
+    const course = await Course.findById(req.params.id);
+    if (!course) return res.status(404).json({ message: 'Course not found' });
+    if (req.user.role !== 'admin' && String(course.tutor) !== req.user.id) {
+      return res.status(403).json({ message: 'Not your course' });
+    }
+    await course.deleteOne();
     res.json({ message: 'Course deleted' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: 'Could not delete course' });
   }
 });
 

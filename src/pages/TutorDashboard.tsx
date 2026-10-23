@@ -1,3 +1,4 @@
+import { apiFetch } from '../api/api'
 import { Link, useLocation } from 'react-router-dom';
 import './TutorDashboard.css';
 import { useAuth } from '../context/AuthContext';
@@ -22,9 +23,9 @@ function TutorDashboard() {
 
   useEffect(() => {
     Promise.all([
-      fetch('http://localhost:5000/api/bookings').then(r => r.json()),
-      fetch('http://localhost:5000/api/courses').then(r => r.json()),
-      fetch('http://localhost:5000/api/reviews').then(r => r.json()),
+      apiFetch('/bookings').then(r => r.json()),
+      apiFetch('/courses').then(r => r.json()),
+      apiFetch('/reviews').then(r => r.json()),
     ]).then(([bookingsData, coursesData, reviewsData]) => {
       // Filter data for logged in tutor
       const myBookings = bookingsData.filter((b: any) => b.tutor?._id === user?._id)

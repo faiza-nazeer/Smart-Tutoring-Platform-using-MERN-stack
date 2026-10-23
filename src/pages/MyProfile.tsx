@@ -1,9 +1,10 @@
+import { apiFetch } from '../api/api'
 import { useState } from "react";
 import "./MyProfile.css";
 import { useAuth } from "../context/AuthContext";
 
 export default function MyProfile() {
-  const { user, updateUser } = useAuth();
+  const { user } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     name: user?.name || '',
@@ -24,14 +25,13 @@ export default function MyProfile() {
   const handleSave = async () => {
     setSaving(true);
     try {
-      await fetch(`http://localhost:5000/api/users/${user?._id}`, {
+      await apiFetch(`/users/${user?._id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(form),
       });
       setSuccess(true);
       setEditing(false);
-      updateUser(form);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err) {
       console.error(err);
@@ -53,7 +53,7 @@ export default function MyProfile() {
             else setEditing(true);
           }}
         >
-          {saving ? 'Saving...' : editing ? "Save Changes" : "Edit Profile"}
+          {saving ? 'Saving...' : editing ? "✓ Save Changes" : "✎ Edit Profile"}
         </button>
       </div>
 

@@ -1,3 +1,4 @@
+import { apiFetch } from '../api/api'
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import "./FindTutors.css";
@@ -9,11 +10,8 @@ interface Tutor {
   city: string;
   status: string;
   role: string;
-  rating?: number;
-  sessions?: number;
-  reviews?: number;
-  price?: number;
 }
+
 const subjects = ["All", "Mathematics", "Physics", "English", "Chemistry", "Biology", "Computer Science", "Urdu", "Statistics"];
 const cities = ["All", "Lahore", "Karachi", "Islamabad"];
 
@@ -26,7 +24,7 @@ export default function FindTutors() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/users")
+    apiFetch("/users")
       .then(res => res.json())
       .then((data: any[]) => {
         const onlyTutors = data.filter(u => u.role === "tutor");
@@ -127,10 +125,8 @@ export default function FindTutors() {
 
               <div className="ft-card__actions">
                 <Link to={`/tutor/${t._id}`} className="ft-btn-outline">View Profile</Link>
-                <Link to={`/booking?tutorId=${t._id}&tutorName=${encodeURIComponent(t.name)}&subject=${encodeURIComponent(t.subject)}&price=${t.price}`} className="ft-btn-primary">
-                  Book Session
-                </Link>            
-                  </div>
+                <Link to={`/booking/${t._id}`} className="ft-btn-primary">Book Session</Link>
+              </div>
             </div>
           ))
         )}

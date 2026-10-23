@@ -1,3 +1,4 @@
+import { apiFetch } from '../api/api'
 import { useEffect, useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import "./MySessions.css";
@@ -26,7 +27,7 @@ export default function MySessions() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('http://localhost:5000/api/bookings')
+    apiFetch('/bookings')
       .then(res => res.json())
       .then((data: any[]) => {
         const mySessions = data.filter(b => b.student?._id === user?._id);

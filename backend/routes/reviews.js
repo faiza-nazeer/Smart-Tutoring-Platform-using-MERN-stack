@@ -1,31 +1,27 @@
 const express = require('express');
 const router = express.Router();
 const Review = require('../models/Review');
+const { auth } = require('../middleware/auth');
 
-// GET all reviews
+// GET all reviews (public)
 router.get('/', async (req, res) => {
   try {
-    const reviews = await Review.find()
-      .populate('student', 'name')
-      .populate('tutor', 'name');
-    res.json(reviews);
+    res.json(await Review.find().populate('student', 'name').populate('tutor', 'name'));
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: 'Could not load reviews' });
   }
 });
 
 // GET reviews for a specific tutor (must be BEFORE /:id)
 router.get('/tutor/:tutorId', async (req, res) => {
   try {
-    const reviews = await Review.find({ tutor: req.params.tutorId })
-      .populate('student', 'name');
-    res.json(reviews);
+    res.json(await Review.find({ tutor: req.params.tutorId }).populate('student', 'name'));
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid tutor id' });
   }
 });
 
-// GET single review by id (must be AFTER specific routes)
+// GET single review
 router.get('/:id', async (req, res) => {
   try {
     const review = await Review.findById(req.params.id)
@@ -34,28 +30,35 @@ router.get('/:id', async (req, res) => {
     if (!review) return res.status(404).json({ message: 'Review not found' });
     res.json(review);
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: 'Invalid review id' });
   }
 });
 
-// POST create review
-router.post('/', async (req, res) => {
+// POST create review: reviewer is always the logged-in user
+router.post('/', auth, async (req, res) => {
   try {
-    const review = new Review(req.body);
-    const saved = await review.save();
+    const { tutor, course, rating, comment } = req.body;
+    const saved = await new Review({
+      student: req.user.id, tutor, course, rating, comment,
+    }).save();
     res.status(201).json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }
 });
 
-// DELETE review
-router.delete('/:id', async (req, res) => {
+// DELETE review: the author or an admin
+router.delete('/:id', auth, async (req, res) => {
   try {
-    await Review.findByIdAndDelete(req.params.id);
+    const review = await Review.findById(req.params.id);
+    if (!review) return res.status(404).json({ message: 'Review not found' });
+    if (req.user.role !== 'admin' && String(review.student) !== req.user.id) {
+      return res.status(403).json({ message: 'Not your review' });
+    }
+    await review.deleteOne();
     res.json({ message: 'Review deleted' });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    res.status(400).json({ message: 'Could not delete review' });
   }
 });
 

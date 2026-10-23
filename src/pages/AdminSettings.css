@@ -1,0 +1,127 @@
+/* src/pages/AdminSettings.css */
+.settings-tabs {
+  display: flex;
+  gap: 4px;
+  background: white;
+  border-radius: 10px;
+  padding: 6px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  margin-bottom: 24px;
+  width: fit-content;
+}
+.settings-tab {
+  padding: 8px 18px;
+  border: none;
+  background: transparent;
+  border-radius: 7px;
+  font-size: 0.88rem;
+  cursor: pointer;
+  color: var(--gray);
+  transition: all 0.2s;
+}
+.settings-tab:hover { background: #f5f5ff; color: var(--purple); }
+.settings-tab.active { background: var(--purple); color: white; font-weight: 600; }
+
+.settings-section {
+  background: white;
+  border-radius: 12px;
+  padding: 28px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+}
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 20px;
+}
+.settings-field { display: flex; flex-direction: column; gap: 6px; }
+.settings-field label { font-size: 0.85rem; font-weight: 600; color: var(--dark); }
+.settings-field input,
+.settings-field select {
+  padding: 10px 14px;
+  border: 1px solid #e0e0ef;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  outline: none;
+  color: var(--dark);
+}
+.settings-field input:focus,
+.settings-field select:focus { border-color: var(--purple); }
+.field-hint { font-size: 0.78rem; color: var(--light-gray); margin: 0; }
+
+.input-group {
+  display: flex;
+  align-items: center;
+  border: 1px solid #e0e0ef;
+  border-radius: 8px;
+  overflow: hidden;
+}
+.input-group input { border: none; padding: 10px 14px; flex: 1; outline: none; font-size: 0.9rem; }
+.input-affix { background: #f5f5ff; padding: 10px 12px; font-size: 0.85rem; color: var(--gray); }
+
+.notif-group { margin-bottom: 24px; }
+.notif-group h4 {
+  font-size: 0.95rem; color: var(--dark);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #f0f0f8;
+}
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f8f8ff;
+}
+.toggle-label { font-size: 0.88rem; font-weight: 500; color: var(--dark); text-transform: capitalize; }
+.toggle-desc  { font-size: 0.78rem; color: var(--light-gray); }
+.toggle-btn {
+  width: 44px; height: 24px;
+  background: #ddd; border: none; border-radius: 12px;
+  cursor: pointer; position: relative; transition: background 0.2s;
+  flex-shrink: 0;
+}
+.toggle-btn.on { background: var(--purple); }
+.toggle-knob {
+  position: absolute; top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  background: white; border-radius: 50%;
+  transition: transform 0.2s; display: block;
+}
+.toggle-btn.on .toggle-knob { transform: translateX(20px); }
+
+.security-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.security-card {
+  background: #fafaff;
+  border: 1px solid #eeeeff;
+  border-radius: 12px;
+  padding: 20px;
+}
+.security-icon { font-size: 1.8rem; margin-bottom: 8px; }
+.security-card h4 { margin: 0 0 6px; color: var(--dark); }
+.security-card p  { font-size: 0.85rem; color: var(--gray); margin: 0 0 16px; }
+.tfa-info {
+  background: #f0f0ff;
+  border-radius: 8px;
+  padding: 12px;
+  font-size: 0.83rem;
+  color: var(--gray);
+  margin-top: 16px;
+}
+
+.settings-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+.save-toast {
+  background: #e8f5e9; color: #2e7d32;
+  border: 1px solid #c8e6c9;
+  padding: 10px 18px; border-radius: 8px;
+  font-size: 0.88rem; font-weight: 600;
+  animation: fadeIn 0.3s ease;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}

@@ -1,11 +1,10 @@
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState } from 'react';
 
 interface AuthContextType {
   user: any;
   token: string | null;
   login: (userData: any, token: string) => void;
   logout: () => void;
-  updateUser: (data: any) => void;
   isAuthenticated: boolean;
 }
 
@@ -14,22 +13,19 @@ const AuthContext = createContext<AuthContextType>({
   token: null,
   login: () => {},
   logout: () => {},
-  updateUser: () => {},
   isAuthenticated: false,
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
-  const [token, setToken] = useState<string | null>(null);
-
-  useEffect(() => {
-    const savedToken = localStorage.getItem('token');
-    const savedUser = localStorage.getItem('user');
-    if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
+  const [user, setUser] = useState<any>(() => {
+    try {
+      const saved = localStorage.getItem('user');
+      return saved && localStorage.getItem('token') ? JSON.parse(saved) : null;
+    } catch {
+      return null;
     }
-  }, []);
+  });
+  const [token, setToken] = useState<string | null>(() => localStorage.getItem('token'));
 
   const login = (userData: any, userToken: string) => {
     setUser(userData);
@@ -45,19 +41,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.removeItem('user');
   };
 
-  const updateUser = (updatedData: any) => {
-    const newUser = { ...user, ...updatedData };
-    setUser(newUser);
-    localStorage.setItem('user', JSON.stringify(newUser));
-  };
-
   return (
     <AuthContext.Provider value={{
       user,
       token,
       login,
       logout,
-      updateUser,
       isAuthenticated: !!token
     }}>
       {children}

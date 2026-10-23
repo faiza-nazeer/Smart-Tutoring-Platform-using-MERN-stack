@@ -31,51 +31,62 @@ import AdminTutors from "./pages/AdminTutors";
 import AdminCourses from "./pages/AdminCourses";
 import AdminBookings from "./pages/AdminBookings";
 import AdminEarnings from "./pages/AdminEarnings";
+import AdminSettings from "./pages/AdminSettings";
 import Reviews from './pages/Reviews';
 import ForgotPassword from './pages/ForgotPassword'
+import NotFound from './pages/NotFound'
+import RequireRole from './components/RequireRole'
 
 
 function App() {
+  const student = ['student']
+  const tutor = ['tutor']
+  const admin = ['admin']
+
   return (
     <BrowserRouter>
       <Routes>
+        {/* Public pages */}
         <Route path="/" element={<Home />} />
-
-        {/* Add more routes here as you build more pages: */}
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/courses" element={<Courses />} />
         <Route path="/courses/:id" element={<CourseDetail />} />
-        <Route path="/dashboard/student" element={<StudentDashboard />} />
-        <Route path="/booking" element={<Booking />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/about" element={<About />} />
-        <Route path="/tutor/:id"      element={<TutorProfile />} />
-        
-        // Add inside Routes:
-        <Route path="/forgot-password" element={<ForgotPassword />} />
-        {/* Student Dashboard */}
-        <Route path="/dashboard/student" element={<StudentDashboard />} />
-        <Route path="/dashboard/courses" element={<MyCourses />} />
-        <Route path="/dashboard/sessions" element={<MySessions />} />
-        <Route path="/dashboard/profile" element={<MyProfile />} />
-        <Route path="/dashboard/find-tutors" element={<FindTutors />} />
-        <Route path="/dashboard/tutor" element={<TutorDashboard />} />
-        <Route path="/dashboard/tutor/sessions"  element={<TutorSessions />} />
-        <Route path="/dashboard/tutor/courses"   element={<TutorCourses />} />
-        <Route path="/dashboard/tutor/profile" element={<MyProfile />} />
-        <Route path="/dashboard/tutor/students"  element={<TutorStudents />} />
-        <Route path="/dashboard/tutor/earnings"  element={<TutorEarnings />} />
-        {/* <Route path="/dashboard/tutor" element={<TutorDashboard />} /> */}
-        <Route path="/dashboard/admin" element={<AdminDashboard />} />
-        <Route path="/dashboard/admin/users" element={<AdminUsers />} />
-        <Route path="/dashboard/admin/tutors" element={<AdminTutors />} />
-        <Route path="/dashboard/admin/courses" element={<AdminCourses />} />
-        <Route path="/dashboard/admin/bookings" element={<AdminBookings />} />
-        <Route path="/dashboard/admin/earnings" element={<AdminEarnings />} />
+        <Route path="/tutor/:id" element={<TutorProfile />} />
         <Route path="/tutor/:id/reviews" element={<Reviews />} />
-        <Route path="/dashboard/tutor/reviews" element={<Reviews />} />
 
+        {/* Booking: any logged-in user, for a specific tutor */}
+        <Route path="/booking" element={<RequireRole><Booking /></RequireRole>} />
+        <Route path="/booking/:tutorId" element={<RequireRole><Booking /></RequireRole>} />
+
+        {/* Student area */}
+        <Route path="/dashboard/student" element={<RequireRole roles={student}><StudentDashboard /></RequireRole>} />
+        <Route path="/dashboard/courses" element={<RequireRole roles={student}><MyCourses /></RequireRole>} />
+        <Route path="/dashboard/sessions" element={<RequireRole roles={student}><MySessions /></RequireRole>} />
+        <Route path="/dashboard/profile" element={<RequireRole roles={['student', 'tutor']}><MyProfile /></RequireRole>} />
+        <Route path="/dashboard/find-tutors" element={<RequireRole roles={student}><FindTutors /></RequireRole>} />
+
+        {/* Tutor area */}
+        <Route path="/dashboard/tutor" element={<RequireRole roles={tutor}><TutorDashboard /></RequireRole>} />
+        <Route path="/dashboard/tutor/sessions" element={<RequireRole roles={tutor}><TutorSessions /></RequireRole>} />
+        <Route path="/dashboard/tutor/courses" element={<RequireRole roles={tutor}><TutorCourses /></RequireRole>} />
+        <Route path="/dashboard/tutor/students" element={<RequireRole roles={tutor}><TutorStudents /></RequireRole>} />
+        <Route path="/dashboard/tutor/earnings" element={<RequireRole roles={tutor}><TutorEarnings /></RequireRole>} />
+        <Route path="/dashboard/tutor/reviews" element={<RequireRole roles={tutor}><Reviews /></RequireRole>} />
+
+        {/* Admin area */}
+        <Route path="/dashboard/admin" element={<RequireRole roles={admin}><AdminDashboard /></RequireRole>} />
+        <Route path="/dashboard/admin/users" element={<RequireRole roles={admin}><AdminUsers /></RequireRole>} />
+        <Route path="/dashboard/admin/tutors" element={<RequireRole roles={admin}><AdminTutors /></RequireRole>} />
+        <Route path="/dashboard/admin/courses" element={<RequireRole roles={admin}><AdminCourses /></RequireRole>} />
+        <Route path="/dashboard/admin/bookings" element={<RequireRole roles={admin}><AdminBookings /></RequireRole>} />
+        <Route path="/dashboard/admin/earnings" element={<RequireRole roles={admin}><AdminEarnings /></RequireRole>} />
+        <Route path="/dashboard/admin/settings" element={<RequireRole roles={admin}><AdminSettings /></RequireRole>} />
+
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </BrowserRouter>
   )
