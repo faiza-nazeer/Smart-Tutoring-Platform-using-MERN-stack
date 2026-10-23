@@ -1,8 +1,12 @@
 // Single place that knows where the backend lives.
-// Set VITE_API_URL in your host (e.g. https://your-api.onrender.com/api). Falls back to local dev.
-export const API_URL: string = (
-  import.meta.env.VITE_API_URL || 'http://localhost:5000/api'
-).replace(/\/$/, '');
+// Set VITE_API_URL in Vercel (e.g. https://smart-tutoring-platform.bonto.run/api).
+// Local development falls back to http://localhost:5000/api.
+// The base always ends in exactly one "/api", and every path below starts with "/auth", "/users", etc.,
+// so requests never become ".../api/api/...".
+const RAW_API_URL: string = (import.meta.env.VITE_API_URL || 'http://localhost:5000/api')
+  .trim()
+  .replace(/\/+$/, '');
+export const API_URL: string = RAW_API_URL.endsWith('/api') ? RAW_API_URL : `${RAW_API_URL}/api`;
 
 // fetch() wrapper: prefixes the API URL, sends the JWT, and signs the user out if it has expired.
 export const apiFetch = async (path: string, options: RequestInit = {}): Promise<Response> => {
@@ -13,7 +17,8 @@ export const apiFetch = async (path: string, options: RequestInit = {}): Promise
   }
   if (token) headers.set('Authorization', `Bearer ${token}`);
 
-  const res = await fetch(`${API_URL}${path}`, { ...options, headers });
+  const cleanPath = `/${path.replace(/^\/+/, '').replace(/^api\//, '')}`;
+  const res = await fetch(`${API_URL}${cleanPath}`, { ...options, headers });
 
   if (res.status === 401 && token) {
     localStorage.removeItem('token');
