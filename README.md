@@ -7,7 +7,7 @@ A full-stack MERN web application that connects students with tutors. Students d
 | **Live application** | https://smart-tutoring-platform-using-mern.vercel.app/ |
 | **Backend API** | https://smart-tutoring-platform.bonto.run/api |
 | **API health check** | https://smart-tutoring-platform.bonto.run/api/health |
-| **Developed by** | F230592, F230831 |
+
 
 ---
 
