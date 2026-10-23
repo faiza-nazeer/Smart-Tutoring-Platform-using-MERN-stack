@@ -51,15 +51,15 @@ function Hero() {
         <div className="hero__floating-icon hero__floating-icon--tr">🎓</div>
         <div className="hero__floating-icon hero__floating-icon--br">📚</div>
 
-        {/* Replace with your actual image */}
-        <div className="hero__image-placeholder">
-          <span>📸 Add hero image here</span>
-          <code>src/assets/tutor-hero.png</code>
+        <div className="hero__card">
+          <div className="hero__card-icon">🎓</div>
+          <p className="hero__card-title">Learn from verified tutors</p>
+          <ul className="hero__card-list">
+            <li>1-on-1 online sessions</li>
+            <li>Flexible scheduling</li>
+            <li>20+ subjects</li>
+          </ul>
         </div>
-
-        {/* Uncomment when you have the image:
-        <img src="/assets/tutor-hero.png" alt="Tutor and student" className="hero__image" />
-        */}
       </div>
     </section>
   )

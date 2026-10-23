@@ -7,15 +7,11 @@ function About() {
       <div className="about__image-wrap">
         <div className="about__circle-bg"></div>
 
-        {/* Replace with your actual image once you have it */}
-        <div className="about__image-placeholder">
-          <span>📸 Add founder image here</span>
-          <code>src/assets/founder.png</code>
+        <div className="about__card">
+          <div className="about__card-item"><span>✅</span> Verified, expert tutors</div>
+          <div className="about__card-item"><span>📅</span> Easy session booking</div>
+          <div className="about__card-item"><span>💼</span> Tools for tutors to grow</div>
         </div>
-
-        {/* Uncomment this when you have the image:
-        <img src="/assets/founder.png" alt="Founder" className="about__image" />
-        */}
       </div>
 
       <div className="about__content">

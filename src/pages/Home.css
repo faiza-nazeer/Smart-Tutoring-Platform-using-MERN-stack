@@ -175,29 +175,46 @@
   z-index: 2;
 }
 
-.hero__image-placeholder {
+.hero__card {
   width: 280px;
-  height: 320px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 2px dashed rgba(255, 255, 255, 0.4);
-  border-radius: 16px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: rgba(255, 255, 255, 0.7);
-  font-size: 14px;
+  padding: 32px 28px;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 20px;
+  backdrop-filter: blur(6px);
+  align-self: center;
   text-align: center;
+  color: var(--white);
   z-index: 2;
 }
 
-.hero__image-placeholder code {
-  font-size: 11px;
-  background: rgba(0, 0, 0, 0.2);
-  padding: 4px 10px;
-  border-radius: 4px;
-  color: rgba(255, 255, 255, 0.6);
+.hero__card-icon {
+  font-size: 56px;
+  line-height: 1;
+  margin-bottom: 14px;
+}
+
+.hero__card-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0 0 16px;
+}
+
+.hero__card-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.hero__card-list li {
+  background: rgba(255, 255, 255, 0.12);
+  border-radius: 999px;
+  padding: 8px 14px;
 }
 
 .hero__circle {
@@ -334,30 +351,30 @@
   object-fit: contain;
 }
 
-.about__image-placeholder {
+.about__card {
   position: relative;
   z-index: 1;
-  width: 220px;
-  height: 300px;
-  background: rgba(108, 99, 255, 0.08);
-  border: 2px dashed var(--purple);
-  border-radius: 12px;
+  align-self: center;
+  width: 250px;
+  background: var(--white);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  color: var(--purple);
-  font-size: 13px;
-  text-align: center;
+  gap: 8px;
 }
 
-.about__image-placeholder code {
-  font-size: 11px;
-  background: #ede9ff;
-  padding: 4px 10px;
-  border-radius: 4px;
-  color: var(--purple);
+.about__card-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--dark);
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .about__content {
