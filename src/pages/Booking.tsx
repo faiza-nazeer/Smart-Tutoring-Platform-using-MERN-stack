@@ -62,6 +62,21 @@ function Booking() {
 
   if (tutorLoading) return <div style={{ padding: '2rem' }}>Loading...</div>
 
+  if (tutor && !(tutor.price > 0)) {
+    return (
+      <div>
+        <Navbar />
+        <div className="booking" style={{ textAlign: 'center', padding: '4rem 1rem' }}>
+          <h2>{tutor.name} isn't taking bookings yet</h2>
+          <p>This tutor hasn't set a session price. Please check back soon or choose another tutor.</p>
+          <Link to="/dashboard/find-tutors" className="booking__submit-btn" style={{ display: 'inline-block', marginTop: '1rem', textDecoration: 'none' }}>
+            Find Tutors
+          </Link>
+        </div>
+      </div>
+    )
+  }
+
   if (!tutorId || !tutor) {
     return (
       <div>

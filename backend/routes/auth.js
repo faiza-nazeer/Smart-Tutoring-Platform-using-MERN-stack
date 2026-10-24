@@ -15,6 +15,7 @@ function publicUser(u) {
     role: u.role,
     city: u.city,
     subject: u.subject,
+    price: u.price,
   };
 }
 
@@ -26,6 +27,7 @@ function signToken(u) {
 router.post('/register', async (req, res) => {
   try {
     const { name, password, subject, city } = req.body;
+    const price = Number(req.body.price);
     const email = String(req.body.email || '').trim().toLowerCase();
     const role = SELF_SERVICE_ROLES.includes(req.body.role) ? req.body.role : 'student';
 
@@ -34,6 +36,10 @@ router.post('/register', async (req, res) => {
     }
     if (typeof password !== 'string' || password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters' });
+    }
+
+    if (role === 'tutor' && (!subject || !(price > 0))) {
+      return res.status(400).json({ message: 'Tutors must choose a subject and set a price per session' });
     }
 
     const existing = await User.findOne({ email });
@@ -48,6 +54,7 @@ router.post('/register', async (req, res) => {
       password: hashedPassword,
       role,
       subject: role === 'tutor' ? subject : undefined,
+      price: role === 'tutor' ? price : undefined,
       city,
     }).save();
 

@@ -30,18 +30,6 @@ function Hero() {
             Become a Tutor
           </a>
         </div>
-
-        <div className="hero__search">
-          <div className="hero__search-input-wrap">
-            <span className="hero__search-icon">🔍</span>
-            <input
-              type="text"
-              className="hero__search-input"
-              placeholder="Search for a course or subject..."
-            />
-          </div>
-          <button className="hero__search-btn">Search</button>
-        </div>
       </div>
 
       <div className="hero__image-wrap">

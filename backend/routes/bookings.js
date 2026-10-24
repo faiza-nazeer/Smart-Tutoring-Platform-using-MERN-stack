@@ -1,11 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const Booking = require('../models/Booking');
+const User = require('../models/User');
 const { auth } = require('../middleware/auth');
 
 const populate = (q) => q.populate('student', 'name email').populate('tutor', 'name email');
 const isParticipant = (b, userId) =>
   String(b.student) === userId || String(b.tutor) === userId;
+
+// Allowed status changes: tutors confirm / complete / cancel, students may only cancel.
+const TUTOR_MOVES = { Pending: ['Confirmed', 'Cancelled'], Confirmed: ['Completed', 'Cancelled'] };
+const STUDENT_MOVES = { Pending: ['Cancelled'], Confirmed: ['Cancelled'] };
 
 // GET bookings: admins see all, everyone else only their own
 router.get('/', auth, async (req, res) => {
@@ -58,13 +63,32 @@ router.put('/:id', auth, async (req, res) => {
     if (!admin && !isParticipant(booking, req.user.id)) {
       return res.status(403).json({ message: 'Not your booking' });
     }
+    const wasCompleted = booking.status === 'Completed';
+
+    if (!admin) {
+      if (['Completed', 'Cancelled'].includes(booking.status)) {
+        return res.status(400).json({ message: `This session is already ${booking.status.toLowerCase()}` });
+      }
+      const next = req.body.status;
+      if (next !== undefined && next !== booking.status) {
+        const moves = String(booking.tutor) === req.user.id ? TUTOR_MOVES : STUDENT_MOVES;
+        if (!(moves[booking.status] || []).includes(next)) {
+          return res.status(403).json({ message: `You cannot change this session from ${booking.status} to ${next}` });
+        }
+      }
+    }
+
     const allowed = admin
       ? ['status', 'date', 'time', 'notes', 'duration', 'sessionType', 'amount']
       : ['status', 'date', 'time', 'notes'];
     for (const key of allowed) {
       if (req.body[key] !== undefined) booking[key] = req.body[key];
     }
-    res.json(await booking.save());
+    const saved = await booking.save();
+    if (!wasCompleted && saved.status === 'Completed') {
+      await User.findByIdAndUpdate(saved.tutor, { $inc: { sessions: 1 } });
+    }
+    res.json(saved);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

@@ -1,62 +1,90 @@
-import "./TutorStudents.css";
-
-const students = [
-  { id: 1, name: "Ahmed Khan", course: "Master Mathematics", progress: 65, sessions: 8, lastSeen: "Today", avatar: "AK", rating: 5 },
-  { id: 2, name: "Fatima Tariq", course: "Advanced Algebra", progress: 40, sessions: 5, lastSeen: "Yesterday", avatar: "FT", rating: 5 },
-  { id: 3, name: "Hassan Ali", course: "Calculus Fundamentals", progress: 80, sessions: 12, lastSeen: "2 days ago", avatar: "HA", rating: 4 },
-  { id: 4, name: "Zara Imran", course: "Master Mathematics", progress: 55, sessions: 6, lastSeen: "3 days ago", avatar: "ZI", rating: 5 },
-  { id: 5, name: "Bilal Shah", course: "Advanced Algebra", progress: 30, sessions: 3, lastSeen: "1 week ago", avatar: "BS", rating: 4 },
-  { id: 6, name: "Nadia Iqbal", course: "Calculus Fundamentals", progress: 90, sessions: 15, lastSeen: "Today", avatar: "NI", rating: 5 },
-];
+import { useEffect, useState } from 'react'
+import { useAuth } from '../context/AuthContext'
+import TutorLayout from '../components/TutorLayout'
+import { fmtDate, initials, isUpcoming, loadMyBookings, loadTutorReviews } from '../utils/tutor'
+import './TutorStudents.css'
 
 export default function TutorStudents() {
+  const { user } = useAuth()
+  const [bookings, setBookings] = useState<any[]>([])
+  const [reviews, setReviews] = useState<any[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!user?._id) return
+    Promise.all([loadMyBookings(), loadTutorReviews(user._id)])
+      .then(([b, r]) => { setBookings(b); setReviews(r) })
+      .catch(() => setError('Could not load your students. Please refresh.'))
+      .finally(() => setLoading(false))
+  }, [user?._id])
+
+  // One entry per student, built from their bookings with this tutor.
+  const byStudent = new Map<string, any>()
+  for (const b of bookings.filter(x => x.status !== 'Cancelled' && x.student?._id)) {
+    const entry = byStudent.get(b.student._id) || {
+      id: b.student._id, name: b.student.name, email: b.student.email,
+      subjects: new Set<string>(), completed: 0, upcoming: 0, last: '',
+    }
+    entry.subjects.add(b.subject)
+    if (b.status === 'Completed') entry.completed += 1
+    if (isUpcoming(b)) entry.upcoming += 1
+    if (b.date > entry.last) entry.last = b.date
+    byStudent.set(b.student._id, entry)
+  }
+  const students = [...byStudent.values()].sort((a, b) => b.last.localeCompare(a.last))
+  const ratingFor = (id: string) => reviews.find(r => r.student?._id === id)?.rating
+
   return (
-    <div className="tstu-page">
-      <div className="tstu-header">
-        <div>
-          <h1>My Students</h1>
-          <p>Track all your enrolled students</p>
-        </div>
-        <div className="tstu-stats-mini">
-          <div><strong>48</strong><span>Total Students</span></div>
-          <div><strong>6</strong><span>Active Now</span></div>
-        </div>
-      </div>
-
-      <div className="tstu-grid">
-        {students.map(s => (
-          <div className="tstu-card" key={s.id}>
-            <div className="tstu-card__top">
-              <div className="tstu-avatar">{s.avatar}</div>
-              <div className="tstu-card__info">
-                <h3>{s.name}</h3>
-                <p>{s.course}</p>
-              </div>
-              <span className="tstu-last-seen">{s.lastSeen}</span>
-            </div>
-
-            <div className="tstu-card__progress">
-              <div className="tstu-progress-label">
-                <span>Progress</span>
-                <span>{s.progress}%</span>
-              </div>
-              <div className="tstu-progress-bar">
-                <div className="tstu-progress-fill" style={{ width: `${s.progress}%` }} />
-              </div>
-            </div>
-
-            <div className="tstu-card__footer">
-              <span>📅 {s.sessions} sessions</span>
-              <span>{'⭐'.repeat(s.rating)}</span>
-            </div>
-
-            <div className="tstu-card__actions">
-              <button className="tstu-btn-outline">View Profile</button>
-              <button className="tstu-btn-primary">Message</button>
-            </div>
+    <TutorLayout flush>
+      <div className="tstu-page">
+        <div className="tstu-header">
+          <div>
+            <h1>My Students</h1>
+            <p>Students who have booked sessions with you</p>
           </div>
-        ))}
+          <div className="tstu-stats-mini">
+            <div><strong>{students.length}</strong><span>Total Students</span></div>
+            <div><strong>{students.filter(s => s.upcoming > 0).length}</strong><span>With Upcoming</span></div>
+          </div>
+        </div>
+
+        {error && <div className="tx-error">{error}</div>}
+
+        {loading ? (
+          <div className="tx-loading">Loading students...</div>
+        ) : students.length === 0 ? (
+          <div className="tx-empty">No students yet. They will appear here once someone books a session with you.</div>
+        ) : (
+          <div className="tstu-grid">
+            {students.map(s => {
+              const rating = ratingFor(s.id)
+              return (
+                <div className="tstu-card" key={s.id}>
+                  <div className="tstu-card__top">
+                    <div className="tstu-avatar">{initials(s.name)}</div>
+                    <div className="tstu-card__info">
+                      <h3>{s.name}</h3>
+                      <p>{[...s.subjects].join(', ')}</p>
+                    </div>
+                    {s.upcoming > 0 && <span className="tx-badge tx-badge--pending">{s.upcoming} upcoming</span>}
+                  </div>
+
+                  <div className="tstu-card__footer">
+                    <span>✅ {s.completed} completed</span>
+                    <span>{rating ? '⭐'.repeat(rating) : 'Not reviewed'}</span>
+                  </div>
+                  <p className="tx-note">Last session: {fmtDate(s.last)}</p>
+
+                  <div className="tstu-card__actions">
+                    {s.email && <a className="tstu-btn-primary" style={{ textDecoration: 'none', textAlign: 'center' }} href={`mailto:${s.email}`}>✉ Email</a>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
-    </div>
-  );
+    </TutorLayout>
+  )
 }

@@ -72,9 +72,10 @@ router.put('/:id', auth, async (req, res) => {
     const updated = await User.findByIdAndUpdate(req.params.id, updates, {
       new: true,
       runValidators: true,
-    }).select('-password');
+    });
     if (!updated) return res.status(404).json({ message: 'User not found' });
-    res.json(updated);
+    const { password: _pw, ...safe } = updated.toObject();
+    res.json(safe);
   } catch (err) {
     res.status(400).json({ message: err.message });
   }

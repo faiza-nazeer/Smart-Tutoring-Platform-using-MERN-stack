@@ -16,7 +16,7 @@ A full-stack MERN web application that connects students with tutors. Students d
 Finding a reliable tutor and scheduling sessions is usually done through informal channels. eTutor puts this on one platform with three role-based experiences:
 
 - **Students** browse tutors and courses, book one-on-one sessions and track their session history.
-- **Tutors** publish and manage their own courses, review incoming bookings, and see their reviews.
+- **Tutors** create, edit, publish and delete their own courses, accept or decline session requests and mark sessions completed, see their students and real earnings, reply to reviews, and edit their public profile.
 - **Admins** manage users, tutors, courses and bookings, view earnings analytics and read contact-form messages.
 
 ## 2. Key features
@@ -27,7 +27,9 @@ Finding a reliable tutor and scheduling sessions is usually done through informa
 | Role-based access | Separate student, tutor and admin areas, enforced in both the UI and the API |
 | Tutor discovery | Search and filter tutors by subject, city and availability; view tutor profiles and reviews |
 | Booking | Choose date, time, subject and session type (online / in-person); the price comes from the tutor's rate |
-| Course management | Tutors create, edit and delete their own courses; admins can manage all courses |
+| Course management | Tutors create, edit, publish/unpublish and delete their own courses (drafts are hidden from the public); admins can manage all courses |
+| Session workflow | Students request a session; the tutor accepts, declines or completes it; students can cancel. Earnings and student lists are calculated from completed sessions |
+| Reviews | Students can review a tutor once, after a completed session; tutors can reply; the tutor's average rating updates automatically |
 | Admin tools | User and tutor management (suspend/activate, delete), bookings overview, earnings charts, contact inbox |
 | Contact form | Messages are stored in MongoDB and visible to admins |
 
@@ -86,19 +88,20 @@ All routes are under `/api`.
 
 | Endpoint | Access | Description |
 |---|---|---|
-| `POST /auth/register` | Public | Create a student or tutor account (admin accounts cannot be self-registered) |
+| `POST /auth/register` | Public | Create a student or tutor account (tutors must give a subject and a session price; admin accounts cannot be self-registered) |
 | `POST /auth/login` | Public | Log in, returns a JWT and the user |
 | `PUT /auth/change-password` | Logged in | Change own password |
 | `GET /users`, `GET /users/:id` | Public | Tutor listing and profiles; email and phone are hidden except for the owner and admins |
 | `PUT /users/:id` | Owner (limited fields) or admin | Update a profile |
 | `POST /users`, `DELETE /users/:id` | Admin | Create or delete users |
-| `GET /courses`, `GET /courses/:id` | Public | Browse courses |
+| `GET /courses`, `GET /courses/:id` | Public | Browse published courses (a tutor also sees their own drafts) |
 | `POST /courses`, `PUT/DELETE /courses/:id` | Tutor (own) or admin | Manage courses |
 | `GET /bookings` | Logged in | Own bookings; admins receive all |
 | `POST /bookings` | Logged in | Create a booking (student is always the logged-in user) |
-| `PUT/DELETE /bookings/:id` | Participant or admin | Update status or cancel |
+| `PUT/DELETE /bookings/:id` | Participant or admin | Tutors: confirm, complete or cancel. Students: cancel only |
 | `GET /reviews`, `GET /reviews/tutor/:id` | Public | Read reviews |
-| `POST /reviews` | Logged in | Submit a review |
+| `POST /reviews` | Student with a completed session | Submit a review (one per tutor) |
+| `PUT /reviews/:id/reply` | The reviewed tutor | Reply to a review |
 | `POST /contact` | Public | Send a message |
 | `GET /contact` | Admin | Read messages |
 | `GET /health` | Public | Health check |

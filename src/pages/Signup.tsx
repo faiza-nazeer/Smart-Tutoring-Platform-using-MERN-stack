@@ -13,6 +13,8 @@ function Signup() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [subject, setSubject] = useState('')
+  const [price, setPrice] = useState('')
+  const [city, setCity] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -30,6 +32,8 @@ function Signup() {
         password,
         role,
         subject: role === 'tutor' ? subject : undefined,
+        price: role === 'tutor' ? Number(price) : undefined,
+        city: city.trim() || undefined,
       })
       if (data.message) {
         setError(data.message)
@@ -189,6 +193,32 @@ function Signup() {
                   </select>
                 </div>
               )}
+
+              {role === 'tutor' && (
+                <div className="signup-form__group">
+                  <label className="signup-form__label">Price per session (Rs)</label>
+                  <input
+                    className="signup-form__input"
+                    type="number"
+                    min="1"
+                    placeholder="e.g. 1500"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
+                    required
+                  />
+                </div>
+              )}
+
+              <div className="signup-form__group">
+                <label className="signup-form__label">City</label>
+                <input
+                  className="signup-form__input"
+                  type="text"
+                  placeholder="e.g. Lahore"
+                  value={city}
+                  onChange={(e) => setCity(e.target.value)}
+                />
+              </div>
 
               {error && (
                 <div style={{

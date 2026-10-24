@@ -1,26 +1,37 @@
 const express = require('express');
 const router = express.Router();
 const Course = require('../models/Course');
-const { auth, requireRole } = require('../middleware/auth');
+const { auth, optionalAuth, requireRole } = require('../middleware/auth');
 
 const FIELDS = ['title', 'subject', 'level', 'price', 'description', 'status'];
 const pick = (obj, keys) =>
   Object.fromEntries(keys.filter((k) => obj[k] !== undefined).map((k) => [k, obj[k]]));
 
-// GET all courses (public)
-router.get('/', async (req, res) => {
+// Drafts are only visible to the tutor who owns them and to admins.
+const visibleFilter = (user) => {
+  if (user && user.role === 'admin') return {};
+  if (user) return { $or: [{ status: { $ne: 'Draft' } }, { tutor: user.id }] };
+  return { status: { $ne: 'Draft' } };
+};
+
+// GET all courses (public; drafts hidden)
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    res.json(await Course.find().populate('tutor', 'name email'));
+    res.json(await Course.find(visibleFilter(req.user)).populate('tutor', 'name email'));
   } catch (err) {
     res.status(500).json({ message: 'Could not load courses' });
   }
 });
 
-// GET single course (public)
-router.get('/:id', async (req, res) => {
+// GET single course (public; drafts hidden)
+router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const course = await Course.findById(req.params.id).populate('tutor', 'name email');
     if (!course) return res.status(404).json({ message: 'Course not found' });
+    const isOwner = req.user && String(course.tutor?._id) === req.user.id;
+    if (course.status === 'Draft' && !isOwner && !(req.user && req.user.role === 'admin')) {
+      return res.status(404).json({ message: 'Course not found' });
+    }
     res.json(course);
   } catch (err) {
     res.status(400).json({ message: 'Invalid course id' });

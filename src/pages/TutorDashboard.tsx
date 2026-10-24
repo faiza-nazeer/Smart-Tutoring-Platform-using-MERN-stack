@@ -1,119 +1,90 @@
-import { apiFetch } from '../api/api'
-import { Link, useLocation } from 'react-router-dom';
-import './TutorDashboard.css';
-import { useAuth } from '../context/AuthContext';
-import { useEffect, useState } from 'react';
-
-const EARNINGS = [
-  { month: 'Jan', amount: 55000 },
-  { month: 'Feb', amount: 62000 },
-  { month: 'Mar', amount: 58000 },
-  { month: 'Apr', amount: 72000 },
-]
-
-const maxEarning = Math.max(...EARNINGS.map(e => e.amount));
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { apiFetch, updateBooking } from '../api/api'
+import { useAuth } from '../context/AuthContext'
+import TutorLayout from '../components/TutorLayout'
+import {
+  asArray, averageRating, fmtDate, initials, isUpcoming, loadMyBookings,
+  loadTutorReviews, money, monthlyEarnings,
+} from '../utils/tutor'
+import './TutorDashboard.css'
 
 function TutorDashboard() {
-  const location = useLocation();
-  const { user, logout } = useAuth()
+  const { user } = useAuth()
   const [bookings, setBookings] = useState<any[]>([])
   const [courses, setCourses] = useState<any[]>([])
   const [reviews, setReviews] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+  const [busyId, setBusyId] = useState('')
 
   useEffect(() => {
+    if (!user?._id) return
     Promise.all([
-      apiFetch('/bookings').then(r => r.json()),
+      loadMyBookings(),
       apiFetch('/courses').then(r => r.json()),
-      apiFetch('/reviews').then(r => r.json()),
-    ]).then(([bookingsData, coursesData, reviewsData]) => {
-      // Filter data for logged in tutor
-      const myBookings = bookingsData.filter((b: any) => b.tutor?._id === user?._id)
-      const myCourses = coursesData.filter((c: any) => c.tutor?._id === user?._id)
-      const myReviews = reviewsData.filter((r: any) => r.tutor?._id === user?._id)
-      setBookings(myBookings)
-      setCourses(myCourses)
-      setReviews(myReviews)
-      setLoading(false)
-    }).catch(() => setLoading(false))
-  }, [user])
+      loadTutorReviews(user._id),
+    ])
+      .then(([b, c, r]) => {
+        setBookings(b)
+        setCourses(asArray(c).filter((x: any) => x.tutor?._id === user._id))
+        setReviews(r)
+      })
+      .catch(() => setError('Could not load your dashboard. Please refresh.'))
+      .finally(() => setLoading(false))
+  }, [user?._id])
 
-  const TUTOR = {
-    name: user?.name || 'Tutor',
-    email: user?.email || '',
-    avatar: user?.name?.slice(0, 2).toUpperCase() || 'T',
-    subject: user?.subject || 'Subject',
+  const changeStatus = async (id: string, status: string) => {
+    setBusyId(id)
+    setError('')
+    const data = await updateBooking(id, { status })
+    if (data?._id) {
+      setBookings(prev => prev.map(b => (b._id === id ? { ...b, status: data.status } : b)))
+    } else {
+      setError(data?.message || 'Could not update the session.')
+    }
+    setBusyId('')
   }
 
-  const upcomingSessions = bookings.filter(b => b.status === 'Pending' || b.status === 'Confirmed')
-  const completedSessions = bookings.filter(b => b.status === 'Completed')
-  const totalStudents = new Set(bookings.map(b => b.student?._id)).size
-  const avgRating = reviews.length
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-    : 'N/A'
+  const upcoming = bookings
+    .filter(isUpcoming)
+    .sort((a, b) => `${a.date} ${a.time}`.localeCompare(`${b.date} ${b.time}`))
+  const completed = bookings.filter(b => b.status === 'Completed')
+  const pendingCount = bookings.filter(b => b.status === 'Pending').length
+  const students = new Set(bookings.filter(b => b.status !== 'Cancelled').map(b => b.student?._id)).size
+  const avg = averageRating(reviews)
+  const earnings = monthlyEarnings(bookings, 6)
+  const maxEarning = Math.max(...earnings.map(e => e.amount), 1)
+  const firstName = (user?.name || 'Tutor').split(' ')[0]
 
   const stats = [
-    { label: 'Total Students', value: totalStudents, icon: '👨‍🎓' },
-    { label: 'Sessions Done', value: completedSessions.length, icon: '✅' },
-    { label: 'Total Bookings', value: bookings.length, icon: '📅' },
-    { label: 'Avg Rating', value: avgRating, icon: '⭐' },
+    { label: 'Students', value: students, icon: '👨‍🎓' },
+    { label: 'Sessions Done', value: completed.length, icon: '✅' },
+    { label: 'Pending Requests', value: pendingCount, icon: '⏳' },
+    { label: 'Avg Rating', value: reviews.length ? avg.toFixed(1) : '—', icon: '⭐' },
   ]
-
-  const navLinks = [
-    { to: '/dashboard/tutor', label: '🏠 Dashboard' },
-    { to: '/dashboard/tutor/sessions', label: '📅 My Sessions' },
-    { to: '/dashboard/tutor/courses', label: '📚 My Courses' },
-    { to: '/dashboard/tutor/students', label: '👨‍🎓 My Students' },
-    { to: '/dashboard/tutor/earnings', label: '💰 Earnings' },
-    { to: '/dashboard/tutor/profile', label: '👤 My Profile' },
-    { to: '/dashboard/tutor/reviews', label: '⭐ Reviews' },
-  ]
-
-  if (loading) return <div style={{ padding: '2rem' }}>Loading dashboard...</div>
 
   return (
-    <div className="td-page">
-      <div className="td-body">
-
-        <aside className="td-sidebar">
-          <div className="td-logo">🎓 ETutor</div>
-
-          <div className="td-profile">
-            <div className="td-profile__avatar">{TUTOR.avatar}</div>
-            <p className="td-profile__name">{TUTOR.name}</p>
-            <p className="td-profile__subject">{TUTOR.subject} Tutor</p>
-            <span className="td-profile__badge">Tutor</span>
-          </div>
-
-          <nav className="td-nav">
-            {navLinks.map(link => (
-              <Link
-                key={link.to}
-                to={link.to}
-                className={`td-nav__link ${location.pathname === link.to ? 'td-nav__link--active' : ''}`}
-              >
-                {link.label}
-              </Link>
-            ))}
-          </nav>
-
-          <button
-            className="td-logout-btn"
-            onClick={() => { logout(); window.location.href = '/login'; }}
-          >
-            Log Out
-          </button>
-        </aside>
-
-        <main className="td-main">
-
+    <TutorLayout>
+      {loading ? (
+        <div className="tx-loading">Loading dashboard...</div>
+      ) : (
+        <>
           <div className="td-welcome">
             <div>
-              <h1>Welcome back, {TUTOR.name.split(' ')[0]}! 👋</h1>
-              <p>Here's your teaching overview for today.</p>
+              <h1>Welcome back, {firstName}! 👋</h1>
+              <p>Here's your teaching overview.</p>
             </div>
-            <button className="td-availability-btn">✅ Available for Booking</button>
           </div>
+
+          {error && <div className="tx-error">{error}</div>}
+
+          {!(user?.price > 0) && (
+            <div className="tx-error">
+              Students can't book you until you set your session price.{' '}
+              <Link to="/dashboard/tutor/profile" className="tx-link">Set it in My Profile</Link>
+            </div>
+          )}
 
           <div className="td-stats-row">
             {stats.map(stat => (
@@ -126,86 +97,82 @@ function TutorDashboard() {
           </div>
 
           <div className="td-cols">
-
-            {/* Upcoming Sessions */}
             <section className="td-section">
               <div className="td-section__header">
                 <h2>Upcoming Sessions</h2>
                 <Link to="/dashboard/tutor/sessions" className="td-section__link">View all</Link>
               </div>
               <div className="td-sessions">
-                {upcomingSessions.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--gray)' }}>
-                    <p>No upcoming sessions yet</p>
-                  </div>
+                {upcoming.length === 0 ? (
+                  <div className="tx-empty">No upcoming sessions yet</div>
                 ) : (
-                  upcomingSessions.map((s: any) => (
+                  upcoming.slice(0, 4).map((s: any) => (
                     <div className="td-session-card" key={s._id}>
-                      <div className="td-avatar">
-                        {s.student?.name?.slice(0, 2).toUpperCase()}
-                      </div>
+                      <div className="td-avatar">{initials(s.student?.name)}</div>
                       <div className="td-session-card__info">
                         <p className="td-session-card__name">{s.student?.name}</p>
                         <p className="td-session-card__subject">{s.subject}</p>
                       </div>
                       <div className="td-session-card__time">
-                        <p className="td-session-card__date">{s.date}</p>
-                        <p>{s.time} · {s.duration}</p>
+                        <p className="td-session-card__date">{fmtDate(s.date)}</p>
+                        <p>{s.time}{s.duration ? ` · ${s.duration}` : ''}</p>
                       </div>
-                      <button className="td-start-btn">Start</button>
+                      {s.status === 'Pending' ? (
+                        <button className="td-start-btn" disabled={busyId === s._id} onClick={() => changeStatus(s._id, 'Confirmed')}>
+                          Accept
+                        </button>
+                      ) : (
+                        <button className="td-start-btn" disabled={busyId === s._id} onClick={() => changeStatus(s._id, 'Completed')}>
+                          Complete
+                        </button>
+                      )}
                     </div>
                   ))
                 )}
               </div>
             </section>
 
-            {/* Earnings Chart */}
             <section className="td-section">
               <div className="td-section__header">
                 <h2>Monthly Earnings</h2>
                 <Link to="/dashboard/tutor/earnings" className="td-section__link">View all</Link>
               </div>
               <div className="td-earnings-chart">
-                {EARNINGS.map(e => (
-                  <div className="td-bar-wrap" key={e.month}>
-                    <div className="td-bar-amount">Rs {(e.amount / 1000).toFixed(0)}k</div>
+                {earnings.map(e => (
+                  <div className="td-bar-wrap" key={e.key}>
+                    <div className="td-bar-amount">{e.amount ? `Rs ${(e.amount / 1000).toFixed(1)}k` : '—'}</div>
                     <div className="td-bar-track">
-                      <div
-                        className="td-bar-fill"
-                        style={{ height: `${(e.amount / maxEarning) * 100}%` }}
-                      />
+                      <div className="td-bar-fill" style={{ height: `${(e.amount / maxEarning) * 100}%` }} />
                     </div>
                     <div className="td-bar-month">{e.month}</div>
                   </div>
                 ))}
               </div>
+              <p className="tx-note">Based on completed sessions. Total so far: {money(completed.reduce((s, b) => s + (b.amount || 0), 0))}</p>
             </section>
-
           </div>
 
           <div className="td-cols">
-
-            {/* My Courses */}
             <section className="td-section">
               <div className="td-section__header">
                 <h2>My Courses</h2>
-                <Link to="/dashboard/tutor/courses" className="td-section__link">View all</Link>
+                <Link to="/dashboard/tutor/courses" className="td-section__link">Manage</Link>
               </div>
               <div className="td-courses">
                 {courses.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--gray)' }}>
-                    <p>No courses yet</p>
+                  <div className="tx-empty">
+                    No courses yet. <Link to="/dashboard/tutor/courses" className="tx-link">Create your first course</Link>
                   </div>
                 ) : (
-                  courses.map((c: any) => (
+                  courses.slice(0, 4).map((c: any) => (
                     <div className="td-course-card" key={c._id}>
                       <div className="td-course-card__info">
                         <h4>{c.title}</h4>
-                        <p>{c.studentsEnrolled} students enrolled · ⭐ {c.rating}</p>
+                        <p>{c.subject} · {c.level || 'All Levels'} · {money(c.price)}/session</p>
                       </div>
                       <div className="td-progress-label">
                         <span>Status</span>
-                        <span style={{ color: 'var(--purple)', fontWeight: 600 }}>{c.status}</span>
+                        <span style={{ color: c.status === 'Draft' ? '#999' : 'var(--purple)', fontWeight: 600 }}>{c.status}</span>
                       </div>
                     </div>
                   ))
@@ -213,32 +180,24 @@ function TutorDashboard() {
               </div>
             </section>
 
-            {/* Recent Reviews */}
             <section className="td-section">
               <div className="td-section__header">
                 <h2>Recent Reviews</h2>
+                <Link to="/dashboard/tutor/reviews" className="td-section__link">View all</Link>
               </div>
               <div className="td-reviews">
                 {reviews.length === 0 ? (
-                  <div style={{ textAlign: 'center', padding: '2rem', color: 'var(--gray)' }}>
-                    <p>No reviews yet</p>
-                  </div>
+                  <div className="tx-empty">No reviews yet</div>
                 ) : (
-                  reviews.slice(0, 3).map((r: any) => (
+                  [...reviews].reverse().slice(0, 3).map((r: any) => (
                     <div className="td-review-card" key={r._id}>
                       <div className="td-review-card__top">
-                        <div className="td-avatar td-avatar--sm">
-                          {r.student?.name?.slice(0, 2).toUpperCase()}
-                        </div>
+                        <div className="td-avatar td-avatar--sm">{initials(r.student?.name)}</div>
                         <div>
                           <p className="td-review-card__name">{r.student?.name}</p>
-                          <p className="td-review-card__date">
-                            {new Date(r.createdAt).toLocaleDateString()}
-                          </p>
+                          <p className="td-review-card__date">{new Date(r.createdAt).toLocaleDateString()}</p>
                         </div>
-                        <div className="td-review-card__stars">
-                          {'⭐'.repeat(r.rating)}
-                        </div>
+                        <div className="td-review-card__stars">{'⭐'.repeat(r.rating)}</div>
                       </div>
                       <p className="td-review-card__comment">"{r.comment}"</p>
                     </div>
@@ -246,11 +205,10 @@ function TutorDashboard() {
                 )}
               </div>
             </section>
-
           </div>
-        </main>
-      </div>
-    </div>
+        </>
+      )}
+    </TutorLayout>
   )
 }
 

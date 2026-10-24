@@ -5,6 +5,7 @@ interface AuthContextType {
   token: string | null;
   login: (userData: any, token: string) => void;
   logout: () => void;
+  updateUser: (changes: object) => void;
   isAuthenticated: boolean;
 }
 
@@ -13,6 +14,7 @@ const AuthContext = createContext<AuthContextType>({
   token: null,
   login: () => {},
   logout: () => {},
+  updateUser: () => {},
   isAuthenticated: false,
 });
 
@@ -34,6 +36,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem('user', JSON.stringify(userData));
   };
 
+  // Merge profile changes into the signed-in user (e.g. after editing the profile).
+  const updateUser = (changes: object) => {
+    setUser((prev: any) => {
+      const next = { ...prev, ...changes };
+      localStorage.setItem('user', JSON.stringify(next));
+      return next;
+    });
+  };
+
   const logout = () => {
     setUser(null);
     setToken(null);
@@ -47,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       token,
       login,
       logout,
+      updateUser,
       isAuthenticated: !!token
     }}>
       {children}

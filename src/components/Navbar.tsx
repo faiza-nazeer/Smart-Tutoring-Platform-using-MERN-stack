@@ -16,7 +16,6 @@ function Navbar() {
         <li><Link to="/" className={`navbar__link ${location.pathname === '/' ? 'active' : ''}`}>Home</Link></li>
         <li><Link to="/about" className="navbar__link">About</Link></li>
         <li><Link to="/courses" className="navbar__link">Courses</Link></li>
-        <li><Link to="/contact" className="navbar__link">Contact</Link></li>
       </ul>
 
       <div className="navbar__auth">

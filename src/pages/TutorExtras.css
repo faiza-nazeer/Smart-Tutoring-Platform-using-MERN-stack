@@ -1,0 +1,49 @@
+/* Shared styles for the reworked tutor pages */
+.td-main { min-width: 0; }
+.td-main--flush { padding: 0; }
+
+.tx-btn {
+  border: none; cursor: pointer; border-radius: 8px; padding: 0.5rem 0.9rem;
+  font-size: 0.82rem; font-weight: 600; background: var(--purple); color: #fff;
+}
+.tx-btn:hover { filter: brightness(0.95); }
+.tx-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+.tx-btn--ghost { background: #fff; color: var(--purple); border: 1.5px solid var(--purple); }
+.tx-btn--danger { background: #fff; color: #e74c3c; border: 1.5px solid #e74c3c; }
+.tx-btn--green { background: #27ae60; }
+
+.tx-actions { display: flex; gap: 0.5rem; flex-wrap: wrap; }
+.tx-error { background: #fdecea; color: #c0392b; padding: 0.7rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; }
+.tx-success { background: #e6faf0; color: #1e8449; padding: 0.7rem 1rem; border-radius: 10px; margin-bottom: 1rem; font-size: 0.9rem; }
+.tx-empty { text-align: center; padding: 2.5rem 1rem; color: var(--gray); background: #fff; border-radius: 14px; }
+.tx-loading { padding: 2rem; color: var(--gray); }
+.tx-note { font-size: 0.8rem; color: var(--gray); margin-top: 0.25rem; }
+.tx-link { color: var(--purple); text-decoration: none; font-size: 0.8rem; }
+.tx-badge { font-size: 0.72rem; font-weight: 700; padding: 0.2rem 0.6rem; border-radius: 999px; }
+.tx-badge--pending { background: #fff4e0; color: #e67e22; }
+.tx-badge--draft { background: #f0f0f5; color: #777; }
+
+.tx-form-card { background: #fff; border-radius: 16px; padding: 1.75rem; max-width: 640px; box-shadow: 0 2px 16px rgba(108,99,255,0.07); }
+.tx-field { display: flex; flex-direction: column; gap: 0.35rem; margin-bottom: 1rem; }
+.tx-field label { font-size: 0.82rem; font-weight: 600; color: var(--gray); }
+.tx-field input, .tx-field select, .tx-field textarea {
+  padding: 0.65rem 0.8rem; border: 1.5px solid #e0e0f0; border-radius: 8px; font-size: 0.9rem; font-family: inherit;
+}
+.tx-field input:focus, .tx-field select:focus, .tx-field textarea:focus { outline: none; border-color: var(--purple); }
+.tx-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+.tc-modal textarea {
+  padding: 0.65rem 0.8rem; border: 1.5px solid #e0e0f0; border-radius: 8px; font-size: 0.9rem; font-family: inherit; resize: vertical;
+}
+.tc-modal textarea:focus { outline: none; border-color: var(--purple); }
+.tc-desc { font-size: 0.85rem; color: var(--gray); margin: 0.75rem 0 1rem; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+
+.rv-reply-form textarea { width: 100%; padding: 0.6rem; border: 1.5px solid #e0e0f0; border-radius: 8px; font-family: inherit; margin: 0.5rem 0; }
+
+@media (max-width: 860px) {
+  .td-body { flex-direction: column; }
+  .td-sidebar { width: 100%; min-height: auto; position: static; }
+  .td-nav { flex-direction: row; flex-wrap: wrap; }
+  .td-main { padding: 1rem; }
+  .tx-row { grid-template-columns: 1fr; }
+}

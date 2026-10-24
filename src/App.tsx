@@ -35,6 +35,7 @@ import AdminSettings from "./pages/AdminSettings";
 import Reviews from './pages/Reviews';
 import ForgotPassword from './pages/ForgotPassword'
 import NotFound from './pages/NotFound'
+import TutorProfileEdit from './pages/TutorProfileEdit'
 import RequireRole from './components/RequireRole'
 
 
@@ -76,6 +77,7 @@ function App() {
         <Route path="/dashboard/tutor/students" element={<RequireRole roles={tutor}><TutorStudents /></RequireRole>} />
         <Route path="/dashboard/tutor/earnings" element={<RequireRole roles={tutor}><TutorEarnings /></RequireRole>} />
         <Route path="/dashboard/tutor/reviews" element={<RequireRole roles={tutor}><Reviews /></RequireRole>} />
+        <Route path="/dashboard/tutor/profile" element={<RequireRole roles={tutor}><TutorProfileEdit /></RequireRole>} />
 
         {/* Admin area */}
         <Route path="/dashboard/admin" element={<RequireRole roles={admin}><AdminDashboard /></RequireRole>} />
