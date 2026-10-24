@@ -6,12 +6,20 @@ import Navbar from '../components/Navbar'
 import { useAuth } from '../context/AuthContext'
 import { loginUser } from '../api/api'
 
+// Demo accounts created by `npm run seed` (see README). Clicking one fills in the form.
+const DEMO_ACCOUNTS = [
+  { key: 'student', label: '🎒 Demo Student', email: 'student@etutor.demo' },
+  { key: 'tutor', label: '📖 Demo Tutor', email: 'ayesha@etutor.demo' },
+]
+const DEMO_PASSWORD = 'Demo@12345'
+
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
+  const [selectedDemo, setSelectedDemo] = useState('')
   const [tutorCount, setTutorCount] = useState(0)
   const [studentCount, setStudentCount] = useState(0)
   const [avgRating, setAvgRating] = useState(0)
@@ -46,6 +54,13 @@ function Login() {
       })
       .catch(err => console.error(err))
   }, [])
+  const fillDemo = (acc: { key: string; email: string }) => {
+    setSelectedDemo(acc.key)
+    setEmail(acc.email)
+    setPassword(DEMO_PASSWORD)
+    setError('')
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
@@ -112,6 +127,22 @@ function Login() {
               <a href="/signup" className="login-form__link">Sign up for free</a>
             </p>
 
+            <p className="login-form__subtext" style={{ marginBottom: '0.5rem' }}>
+              Just exploring? Pick a demo account:
+            </p>
+            <div className="login-role-toggle">
+              {DEMO_ACCOUNTS.map((acc) => (
+                <button
+                  key={acc.key}
+                  type="button"
+                  className={`login-role-btn ${selectedDemo === acc.key ? 'login-role-btn--active' : ''}`}
+                  onClick={() => fillDemo(acc)}
+                >
+                  {acc.label}
+                </button>
+              ))}
+            </div>
+
             <form className="login-form" onSubmit={handleSubmit}>
               <div className="login-form__group">
                 <label className="login-form__label">Email address</label>
@@ -120,7 +151,7 @@ function Login() {
                   className="login-form__input"
                   placeholder="you@example.com"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={(e) => { setEmail(e.target.value); setSelectedDemo('') }}
                   required
                 />
               </div>
@@ -138,7 +169,7 @@ function Login() {
                     className="login-form__input"
                     placeholder="Enter your password"
                     value={password}
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => { setPassword(e.target.value); setSelectedDemo('') }}
                     required
                   />
                   <button
