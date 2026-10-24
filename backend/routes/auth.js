@@ -26,7 +26,9 @@ function signToken(u) {
 // REGISTER
 router.post('/register', async (req, res) => {
   try {
-    const { name, password, subject, city } = req.body;
+    const { name, password, city } = req.body;
+    // Subject and price are optional at signup; tutors set them later from their profile page.
+    const subject = String(req.body.subject || '').trim();
     const price = Number(req.body.price);
     const email = String(req.body.email || '').trim().toLowerCase();
     const role = SELF_SERVICE_ROLES.includes(req.body.role) ? req.body.role : 'student';
@@ -36,10 +38,6 @@ router.post('/register', async (req, res) => {
     }
     if (typeof password !== 'string' || password.length < 8) {
       return res.status(400).json({ message: 'Password must be at least 8 characters' });
-    }
-
-    if (role === 'tutor' && (!subject || !(price > 0))) {
-      return res.status(400).json({ message: 'Tutors must choose a subject and set a price per session' });
     }
 
     const existing = await User.findOne({ email });
@@ -53,13 +51,14 @@ router.post('/register', async (req, res) => {
       email,
       password: hashedPassword,
       role,
-      subject: role === 'tutor' ? subject : undefined,
-      price: role === 'tutor' ? price : undefined,
+      subject: role === 'tutor' && subject ? subject : undefined,
+      price: role === 'tutor' && price > 0 ? price : undefined,
       city,
     }).save();
 
     res.status(201).json({ token: signToken(saved), user: publicUser(saved) });
   } catch (err) {
+    console.error('Register error:', err);
     res.status(500).json({ message: 'Could not create account' });
   }
 });

@@ -12,8 +12,6 @@ function Signup() {
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [subject, setSubject] = useState('')
-  const [price, setPrice] = useState('')
   const [city, setCity] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [error, setError] = useState('')
@@ -31,8 +29,6 @@ function Signup() {
         email,
         password,
         role,
-        subject: role === 'tutor' ? subject : undefined,
-        price: role === 'tutor' ? Number(price) : undefined,
         city: city.trim() || undefined,
       })
       if (data.message) {
@@ -171,43 +167,6 @@ function Signup() {
                   </button>
                 </div>
               </div>
-
-              {role === 'tutor' && (
-                <div className="signup-form__group">
-                  <label className="signup-form__label">Subject you teach</label>
-                  <select
-                    className="signup-form__input signup-form__select"
-                    value={subject}
-                    onChange={(e) => setSubject(e.target.value)}
-                    required
-                  >
-                    <option value="">Select a subject</option>
-                    <option>Mathematics</option>
-                    <option>Physics</option>
-                    <option>Chemistry</option>
-                    <option>Biology</option>
-                    <option>English</option>
-                    <option>Computer Science</option>
-                    <option>Urdu</option>
-                    <option>Statistics</option>
-                  </select>
-                </div>
-              )}
-
-              {role === 'tutor' && (
-                <div className="signup-form__group">
-                  <label className="signup-form__label">Price per session (Rs)</label>
-                  <input
-                    className="signup-form__input"
-                    type="number"
-                    min="1"
-                    placeholder="e.g. 1500"
-                    value={price}
-                    onChange={(e) => setPrice(e.target.value)}
-                    required
-                  />
-                </div>
-              )}
 
               <div className="signup-form__group">
                 <label className="signup-form__label">City</label>
